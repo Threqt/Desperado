@@ -6,7 +6,7 @@ const rbx = require('noblox.js')
 const db = require('quick.db')
 const bot = new Discord.Client({
   disableEverybody: true
-)};
+});
 
 bot.on("ready", async () => {
   console.log(`${bot.user.username} has successfully been started.`)
