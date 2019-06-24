@@ -28,7 +28,7 @@ bot.on("message", async message => {
 
   let daily = db.fetch(`timeout_${message.author.id}`)
 
-  const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
+  const args = message.content.slice(prefix.length).trim().split(/ +/g);
   const cmd = args.shift().toLowerCase();
 
   if (message.content.indexOf(prefix) !== 0) return;
