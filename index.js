@@ -33,7 +33,7 @@ bot.on("message", async message => {
     if(timeout !== null && timeout - (Date.now() - time) > 0){
       let time1 = ms(timeout - Date.now() - time)
 
-      message.channel.send(`You're on cooldown. Wait ${ms.seconds} and try again.`)
+      message.channel.send(`You're on cooldown. Wait ${time1.seconds} and try again.`)
     } else {
       db.set(`timeout_${message.author.id}`, Date.now())
       let msg = await message.channel.send("Testing...")
