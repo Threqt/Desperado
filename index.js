@@ -8,6 +8,8 @@ const bot = new Discord.Client({
   disableEverybody: true
 });
 const embedColor = config.embedColor
+let cooldown = new Set();
+let cdseconds = 5;
 
 bot.on("ready", async () => {
   console.log(`${bot.user.username} has successfully been started.`)
@@ -33,7 +35,7 @@ bot.on("message", async message => {
 
       message.channel.send(`You're on cooldown. Wait ${ms.seconds} and try again.`)
     } else {
-      db.set(`timeout_${message.author.id}`, 5000)
+      db.set(`timeout_${message.author.id}`, Date.now())
       let msg = await message.channel.send("Testing...")
       let pingEmbed = new Discord.RichEmbed()
         .setColor('#FC9D03')
