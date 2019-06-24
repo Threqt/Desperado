@@ -49,7 +49,9 @@ bot.on("message", async message => {
     }
   } else
   if(cmd === 'settings'){
-    if(message.content.replace(/ /g, '') === '')
+    if(message.content.replace(/ /g, '') === ''){
+
+    }
   }
 })
 bot.login(process.env.token)
