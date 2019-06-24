@@ -9,6 +9,7 @@
   "author": "threqt",
   "license": "ISC",
   "dependencies": {
+    "@sindresorhus/to-milliseconds": "^1.2.0",
     "discord.js": "^11.5.1",
     "moment": "^2.24.0",
     "noblox.js": "^4.2.6",

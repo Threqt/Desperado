@@ -1,4 +1,3 @@
-const config = require('./botconfig.json')
 const Discord = require('discord.js')
 const ms = require('parse-ms')
 const moment = require('moment')
@@ -8,6 +7,8 @@ const bot = new Discord.Client({
   disableEverybody: true
 });
 const embedColor = config.embedColor
+const toMs = require('@sindresorhus/to-milliseconds')
+let prefix = '-'
 
 bot.on("ready", async () => {
   console.log(`${bot.user.username} has successfully been started.`)
@@ -18,6 +19,10 @@ bot.on("ready", async () => {
 
 bot.on("message", async message => {
 
+  if(message.content = '<@591470654407049226>'){
+    message.channel.send(`Prefix is ${prefix}`)
+  }
+
   let timeout = 5000
 
   let daily = db.fetch(`timeout_${message.author.id}`)
@@ -25,7 +30,7 @@ bot.on("message", async message => {
   const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
   const cmd = args.shift().toLowerCase();
 
-  if (message.content.indexOf(config.prefix) !== 0) return;
+  if (message.content.indexOf(prefix) !== 0) return;
 
   if(cmd === `ping`){
     if(daily !== null && timeout - (Date.now() - daily) > 0){
