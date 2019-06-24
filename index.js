@@ -18,18 +18,28 @@ bot.on("ready", async () => {
 
 bot.on("message", async message => {
 
+  let timeout = 5000
+
+  let time = db.fetch(`timeout_${message.author.id}`)
+
   const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
   const cmd = args.shift().toLowerCase();
 
   if (message.content.indexOf(config.prefix) !== 0) return;
 
   if(cmd === `ping`){
-    let msg = await message.channel.send("Testing...")
-    let pingEmbed = new Discord.RichEmbed()
-      .setColor('#FC9D03')
-      .setDescription(`⏱: ${Math.round(msg.createdAt - message.createdAt)}\n⏳: ${Math.round(bot.ping)}`)
-    message.channel.send(pingEmbed)
-    msg.delete()
+    if(timeout !== null && timeout - (Date.now() - time) > 0){
+      let time1 = ms(timeout - Date.now() - time)
+
+      message.channel.send(`You're on cooldown. Wait ${ms.seconds} and try again.`)
+    } else {
+      let msg = await message.channel.send("Testing...")
+      let pingEmbed = new Discord.RichEmbed()
+        .setColor('#FC9D03')
+        .setDescription(`⏱: ${Math.round(msg.createdAt - message.createdAt)}\n⏳: ${Math.round(bot.ping)}`)
+      message.channel.send(pingEmbed)
+      msg.delete()
+    }
   }
 })
 bot.login(process.env.token)
