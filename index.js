@@ -29,6 +29,7 @@ bot.on("message", async message => {
       .setColor('#FC9D03')
       .setDescription(`⏱: ${Math.round(msg.createdAt - message.createdAt)}\n⏳: ${Math.round(bot.ping)}`)
     message.channel.send(pingEmbed)
+    msg.delete()
   }
 })
 bot.login(process.env.token)
