@@ -29,7 +29,7 @@ bot.on("message", async message => {
 
   if(cmd === `ping`){
     if(daily !== null && timeout - (Date.now() - daily) > 0){
-      let time = ms(timeout - Date.now() - time)
+      let time = ms(timeout - Date.now() - daily)
 
       return message.channel.send(`You're on cooldown. Wait ${time.seconds}s and try again.`)
     } else {
