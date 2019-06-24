@@ -19,7 +19,7 @@ bot.on("ready", async () => {
 
 bot.on("message", async message => {
 
-  if(message.content = '<@591470654407049226>'){
+  if(message.isMentioned(bot)){
     message.channel.send(`Prefix is ${prefix}`)
   }
 
