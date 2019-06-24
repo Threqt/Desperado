@@ -1,3 +1,4 @@
+const config = require('./botconfig')
 const Discord = require('discord.js')
 const ms = require('parse-ms')
 const moment = require('moment')
@@ -46,6 +47,9 @@ bot.on("message", async message => {
       msg.delete()
       db.set(`timeout_${message.author.id}`, Date.now())
     }
+  } else
+  if(cmd === 'settings'){
+    if(message.content.replace(/ /g, '') === '')
   }
 })
 bot.login(process.env.token)
