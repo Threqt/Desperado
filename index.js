@@ -20,7 +20,7 @@ bot.on("ready", async () => {
 
 bot.on("message", async message => {
 
-  if(message.isMemberMentioned(bot)){
+  if(message.isMemberMentioned(bot.user)){
     message.channel.send(`Prefix is ${prefix}`)
   }
 
@@ -41,7 +41,7 @@ bot.on("message", async message => {
     } else {
       let msg = await message.channel.send("Testing...")
       let pingEmbed = new Discord.RichEmbed()
-        .setColor('#FC9D03')
+        .setColor(embedColor)
         .setDescription(`⏱: ${Math.round(msg.createdAt - message.createdAt)}\n⏳: ${Math.round(bot.ping)}`)
       message.channel.send(pingEmbed)
       msg.delete()
@@ -50,7 +50,11 @@ bot.on("message", async message => {
   } else
   if(cmd === 'settings'){
     if(message.content.replace(/ /g, '') === ''){
-
+      let helpEmbed = new Discord.RichEmbed()
+        .setColor(embedColor)
+        .setTitle('Settings')
+        .setDescription(`Description: Sets specific settings for the bot\nUsage: ${prefix}settings (settingname) (value)\nExample: ${prefix}settings prefix -`)
+      return message.channel.send(helpEmbed)
     }
   }
 })
