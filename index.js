@@ -20,7 +20,7 @@ bot.on("ready", async () => {
 
 bot.on("message", async message => {
 
-  if(message.isMentioned(bot)){
+  if(message.isMemberMentioned(bot)){
     message.channel.send(`Prefix is ${prefix}`)
   }
 
