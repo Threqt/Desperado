@@ -13,6 +13,12 @@ let prefix = '-'
 
 bot.on("ready", async () => {
   console.log(`${bot.user.username} has successfully been started.`)
+  if(activityType = null){
+    db.set('activityType', 'PLAYING')
+  }
+  if(activity = null){
+    db.set('activity', 'the waiting game')
+  }
   bot.user.setActivity(db.fetch('activity'), {
     type: db.fetch('activityType')
   })
