@@ -9,23 +9,27 @@ const bot = new Discord.Client({
 });
 const embedColor = config.embedColor
 const toMs = require('@sindresorhus/to-milliseconds')
-let prefix = db.get('prefixthing')
-let a2 = db.get('activitything')
-let at2 = db.get('typeactivity')
+let prefix = db.get(`guildInfo_${message.author.id}.prefix`)
 
 bot.on("ready", async () => {
   console.log(`${bot.user.username} has successfully been started.`)
-  console.log(db.get('activitything'))
-  console.log(db.get('typeactivity'))
-  bot.user.setActivity(a2, {
-    type: at2
+  console.log(db.get('activityInfo.activityType'))
+  console.log(db.get('activityInfo.activity'))
+  if(db.get('activityInfo.activity') == null){
+    db.set('activityInfo.activity', 'the waiting game')
+  }
+  if(db.get('activityInfo.activityType') == null){
+    db.set('activityInfo.activityType', 'PLAYING')
+  }
+  bot.user.setActivity(db.get('activityInfo.activity'), {
+    type: db.get('activityInfo.activityType')
   })
 })
 
 bot.on("message", async message => {
 
   if (message.isMemberMentioned(bot.user)) {
-    return message.channel.send(`Prefix is ${db.fetch('prefixthing')}`)
+    return message.channel.send(`Prefix is ${db.fetch(`guildInfo_${message.author.id}.prefix`)}`)
   }
 
   let botrole = message.guild.roles.find("name", "Bot Permissions")
@@ -82,8 +86,8 @@ bot.on("message", async message => {
         if (!args[1]) {
           return message.channel.send("You didn't specify a value.")
         }
-        db.set('prefixthing', args[0])
-        return message.channel.send(`The new prefix is ${db.fetch('prefixthing')}`)
+        db.set(`guildInfo_${message.author.id}.prefix`, args[0])
+        return message.channel.send(`The new prefix is ${db.fetch(`guildInfo_${message.author.id}.prefix`)}`)
       }
       if (args[0] === 'activityType') {
         if (!args[1]) {
@@ -101,11 +105,11 @@ bot.on("message", async message => {
         } else
         if (yes === true) {
           let at = args[1].toUpperCase()
-          db.set('typeactivity', at)
-          bot.user.setActivity(db.get('activitything'), {
-            type: db.get('typeactivity')
+          db.set('activityInfo.activityType', at)
+          bot.user.setActivity(db.get('activityInfo.activity'), {
+            type: db.get('activityInfo.activityType')
           })
-          return message.channel.send(`Set activity type to ${db.get('typeactivity')}`)
+          return message.channel.send(`Set activity type to ${db.get('activityInfo.activityType')}`)
         }
       }
       if (args[0] === 'activity') {
@@ -113,11 +117,11 @@ bot.on("message", async message => {
           return message.channel.send("You didn't specify a value.")
         }
         let activity1 = message.content.slice(18).trim()
-        db.set('activitything', activity1)
-        bot.user.setActivity(db.get('activitything'), {
-          type: db.get('typeactivity')
+        db.set('activityInfo.activity', activity1)
+        bot.user.setActivity(db.get('activityInfo.activity'), {
+          type: db.get('activityInfo.activityType')
         })
-        return message.channel.send(`Set activity to ${db.get('activitything')}`)
+        return message.channel.send(`Set activity to ${db.get('activityInfo.activity')}`)
       }
     }
   }
