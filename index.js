@@ -96,7 +96,7 @@ bot.on("message", async message => {
         bot.user.setActivity(db.fetch('activitything'), {
           type: db.fetch('typeactivity')
         })
-        return message.channel.send(`Set activity type to ${db.fetch('activityType')}`)
+        return message.channel.send(`Set activity type to ${db.fetch('typeactivity')}`)
       }
     }
     if (args[0] === 'activity') {
@@ -108,7 +108,7 @@ bot.on("message", async message => {
       bot.user.setActivity(db.fetch('activitything'), {
         type: db.fetch('typeactivity')
       })
-      return message.channel.send(`Set activity to ${db.fetch('activity')}`)
+      return message.channel.send(`Set activity to ${db.fetch('activitything')}`)
     }
   }
 })
