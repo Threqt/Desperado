@@ -21,8 +21,10 @@ bot.on("ready", async () => {
   if(a = null){
     db.set('activity', 'the waiting game')
   }
-  bot.user.setActivity(db.fetch('activity'), {
-    type: db.fetch('activityType')
+  let a2 = db.fetch('activity')
+  let at2 = db.fetch('activityType')
+  bot.user.setActivity(a2, {
+    type: at2
   })
 })
 
