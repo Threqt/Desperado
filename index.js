@@ -10,20 +10,28 @@ const bot = new Discord.Client({
 const embedColor = config.embedColor
 const toMs = require('@sindresorhus/to-milliseconds')
 let prefix = '-'
+let activityType = "PLAYING"
+let activity = "the waiting game"
 
 bot.on("ready", async () => {
   console.log(`${bot.user.username} has successfully been started.`)
-  bot.user.setActivity("the waiting game", {
-    type: "PLAYING"
+  bot.user.setActivity(activity, {
+    type: activityType
   })
 })
 
 bot.on("message", async message => {
 
   if(message.isMemberMentioned(bot.user)){
-    message.channel.send(`Prefix is ${prefix}`)
+    return message.channel.send(`Prefix is ${prefix}`)
   }
 
+  let role = message.guild.roles.find("name", "Bot Permissions")
+  if(!role){
+    let role1 = message.guild.createRole({
+      name: 'Bot Permissions'
+    })
+  }
   let timeout = 5000
 
   let daily = db.fetch(`timeout_${message.author.id}`)
@@ -52,7 +60,7 @@ bot.on("message", async message => {
     let helpEmbed = new Discord.RichEmbed()
       .setColor(embedColor)
       .setTitle('Settings')
-      .setDescription(`Description: Sets specific settings for the bot\nUsage: ${prefix}settings (settingname) (value)\nExample: ${prefix}settings prefix -`)
+      .setDescription(`Description: Sets specific settings for the bot. Settings: prefix, activity, activityType\nUsage: ${prefix}settings (settingname) (value)\nExample: ${prefix}settings prefix -`)
     if(message.content.replace(/ /g, '') === ''){
       return message.channel.send(helpEmbed)
     }
@@ -67,6 +75,38 @@ bot.on("message", async message => {
       prefix = args[1]
       return message.channel.send(`The new prefix is ${prefix}`)
     }
+    if(args[0] === 'activityType'){
+      if(!args[1]){
+        return message.channel.send("You didn't specify a value.")
+      }
+      let types = ['LISTENING', 'PLAYING', 'WATCHING']
+      let yes = false
+      for(const type of types){
+        if(args[1].toUpperCase() == type){
+          yes = true
+        }
+      }
+      if(yes === false){
+        return message.channel.send("Invalid activity type, try one of the following:\nLISTENING, PLAYING, WATCHING")
+      } else
+      if(yes === true){
+        activityType = args[1].toUpperCase()
+        bot.user.setActivity(activity, {
+          type: activityType
+        })
+      }
+    }
+    if(args[0] === 'activity'){
+      if(message.content.slice(18).trim().replace(/ /g, '') === ''){
+        return message.channel.send("You didn't specify a value.")
+      }
+      let activity1 = message.content.slice(18).trim()
+      activity = activity1
+      bot.user.setActivity(activity, {
+        type: activityType
+      })
+    }
   }
 })
+//18
 bot.login(process.env.token)
