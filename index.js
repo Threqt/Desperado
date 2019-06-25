@@ -15,10 +15,10 @@ bot.on("ready", async () => {
   console.log(`${bot.user.username} has successfully been started.`)
   let a2 = db.fetch('activity')
   let at2 = db.fetch('activityType')
-  if(a2 == null){
+  if (a2 == null) {
     db.set('activity', 'the waiting game')
   }
-  if(at2 == null){
+  if (at2 == null) {
     db.set('activityType', 'PLAYING')
   }
   console.log(db.fetch('activity'))
@@ -30,12 +30,12 @@ bot.on("ready", async () => {
 
 bot.on("message", async message => {
 
-  if(message.isMemberMentioned(bot.user)){
+  if (message.isMemberMentioned(bot.user)) {
     return message.channel.send(`Prefix is ${prefix}`)
   }
 
   let role = message.guild.roles.find("name", "Bot Permissions")
-  if(!role){
+  if (!role) {
     let role1 = message.guild.createRole({
       name: 'Bot Permissions'
     })
@@ -50,8 +50,8 @@ bot.on("message", async message => {
 
   if (message.content.indexOf(prefix) !== 0) return;
 
-  if(cmd === `ping`){
-    if(daily !== null && timeout - (Date.now() - daily) > 0){
+  if (cmd === `ping`) {
+    if (daily !== null && timeout - (Date.now() - daily) > 0) {
       let time = ms(timeout - (Date.now() - daily))
 
       return message.channel.send(`You're on cooldown. Wait ${time.seconds}s and try again.`)
@@ -65,40 +65,39 @@ bot.on("message", async message => {
       db.set(`timeout_${message.author.id}`, Date.now())
     }
   } else
-  if(cmd === 'settings'){
+  if (cmd === 'settings') {
     let helpEmbed = new Discord.RichEmbed()
       .setColor(embedColor)
       .setTitle('Settings')
       .setDescription(`Description: Sets specific settings for the bot. Settings: prefix, activity, activityType\nUsage: ${prefix}settings (settingname) (value)\nExample: ${prefix}settings prefix -`)
-    if(message.content.replace(/ /g, '') === ''){
+    if (message.content.replace(/ /g, '') === '') {
       return message.channel.send(helpEmbed)
     }
-    if(!args[0]){
+    if (!args[0]) {
       return message.channel.send(helpEmbed)
     }
-    if(args[0] === 'prefix'){
-
-      if(!args[1]){
+    if (args[0] === 'prefix') {
+      if (!args[1]) {
         return message.channel.send("You didn't specify a value.")
       }
       prefix = args[1]
       return message.channel.send(`The new prefix is ${prefix}`)
     }
-    if(args[0] === 'activityType'){
-      if(!args[1]){
+    if (args[0] === 'activityType') {
+      if (!args[1]) {
         return message.channel.send("You didn't specify a value.")
       }
       let types = ['LISTENING', 'PLAYING', 'WATCHING']
       let yes = false
-      for(const type of types){
-        if(args[1].toUpperCase() == type){
+      for (const type of types) {
+        if (args[1].toUpperCase() == type) {
           yes = true
         }
       }
-      if(yes === false){
+      if (yes === false) {
         return message.channel.send("Invalid activity type, try one of the following:\nLISTENING, PLAYING, WATCHING")
       } else
-      if(yes === true){
+      if (yes === true) {
         db.set('activityType', args[1].toUpperCase())
         bot.user.setActivity(db.fetch('activity'), {
           type: db.fetch('activityType')
@@ -106,8 +105,8 @@ bot.on("message", async message => {
         return message.channel.send(`Set activity type to ${db.fetch('activityType')}`)
       }
     }
-    if(args[0] === 'activity'){
-      if(message.content.slice(18).trim().replace(/ /g, '') === ''){
+    if (args[0] === 'activity') {
+      if (message.content.slice(18).trim().replace(/ /g, '') === '') {
         return message.channel.send("You didn't specify a value.")
       }
       let activity1 = message.content.slice(18).trim()
