@@ -10,17 +10,11 @@ const bot = new Discord.Client({
 const embedColor = config.embedColor
 const toMs = require('@sindresorhus/to-milliseconds')
 let prefix = '-'
+let a2 = db.fetch('activity')
+let at2 = db.fetch('activityType')
 
 bot.on("ready", async () => {
   console.log(`${bot.user.username} has successfully been started.`)
-  let a2 = db.fetch('activity')
-  let at2 = db.fetch('activityType')
-  if (a2 == null) {
-    db.set('activity', 'the waiting game')
-  }
-  if (at2 == null) {
-    db.set('activityType', 'PLAYING')
-  }
   console.log(db.fetch('activity'))
   console.log(db.fetch('activityType'))
   bot.user.setActivity(db.fetch('activity'), {
