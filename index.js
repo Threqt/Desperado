@@ -10,15 +10,15 @@ const bot = new Discord.Client({
 const embedColor = config.embedColor
 const toMs = require('@sindresorhus/to-milliseconds')
 let prefix = '-'
-let a2 = db.fetch('activity')
-let at2 = db.fetch('activityType')
+let a2 = db.fetch('activitything')
+let at2 = db.fetch('typeactivity')
 
 bot.on("ready", async () => {
   console.log(`${bot.user.username} has successfully been started.`)
-  console.log(db.fetch('activity'))
-  console.log(db.fetch('activityType'))
-  bot.user.setActivity(db.fetch('activity'), {
-    type: db.fetch('activityType')
+  console.log(db.fetch('activitything'))
+  console.log(db.fetch('typeactivity'))
+  bot.user.setActivity(a2, {
+    type: at2
   })
 })
 
@@ -92,9 +92,9 @@ bot.on("message", async message => {
         return message.channel.send("Invalid activity type, try one of the following:\nLISTENING, PLAYING, WATCHING")
       } else
       if (yes === true) {
-        db.set('activityType', args[1].toUpperCase())
-        bot.user.setActivity(db.fetch('activity'), {
-          type: db.fetch('activityType')
+        db.set('typeactivity', args[1].toUpperCase())
+        bot.user.setActivity(db.fetch('activitything'), {
+          type: db.fetch('typeactivity')
         })
         return message.channel.send(`Set activity type to ${db.fetch('activityType')}`)
       }
@@ -104,9 +104,9 @@ bot.on("message", async message => {
         return message.channel.send("You didn't specify a value.")
       }
       let activity1 = message.content.slice(18).trim()
-      db.set('activity', activity1)
-      bot.user.setActivity(db.fetch('activity'), {
-        type: db.fetch('activityType')
+      db.set('activitything', activity1)
+      bot.user.setActivity(db.fetch('activitything'), {
+        type: db.fetch('typeactivity')
       })
       return message.channel.send(`Set activity to ${db.fetch('activity')}`)
     }
