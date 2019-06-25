@@ -43,8 +43,7 @@ bot.on("message", async message => {
     let role1 = await message.guild.createRole({
       name: 'Bot Permissions'
     })
-    let rolee = message.guild.roles.find("name", "Bot Permissions")
-    message.guild.owner.addRole(rolee.id)
+    return message.channel.send("Your server lacks a Bot Permissions role, so I created one for you.")
   }
 
   let timeout = 5000
