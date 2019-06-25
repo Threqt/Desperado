@@ -13,21 +13,21 @@ let prefix;
 
 bot.on("ready", async () => {
   console.log(`${bot.user.username} has successfully been started.`)
-  console.log(db.get('activityInfo.activityType'))
-  console.log(db.get('activityInfo.activity'))
-  if(db.get('activityInfo.activity') == null){
+  if(!db.get('activityInfo.activity')){
     db.set('activityInfo.activity', 'the waiting game')
   }
-  if(db.get('activityInfo.activityType') == null){
+  if(!db.get('activityInfo.activityType')){
     db.set('activityInfo.activityType', 'PLAYING')
   }
+  console.log(db.get('activityInfo.activityType'))
+  console.log(db.get('activityInfo.activity'))
   bot.user.setActivity(db.get('activityInfo.activity'), {
     type: db.get('activityInfo.activityType')
   })
 })
 
 bot.on("message", async message => {
-
+  prefix = db.fetch(`guildInfo_${message.guild.id}`)
   if (message.isMemberMentioned(bot.user)) {
     return message.channel.send(`Prefix is ${db.fetch(`guildInfo_${message.guild.id}.prefix`)}`)
   }
