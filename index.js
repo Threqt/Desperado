@@ -9,7 +9,7 @@ const bot = new Discord.Client({
 });
 const embedColor = config.embedColor
 const toMs = require('@sindresorhus/to-milliseconds')
-let prefix = db.get(`guildInfo_${message.author.id}.prefix`)
+let prefix;
 
 bot.on("ready", async () => {
   console.log(`${bot.user.username} has successfully been started.`)
@@ -29,7 +29,7 @@ bot.on("ready", async () => {
 bot.on("message", async message => {
 
   if (message.isMemberMentioned(bot.user)) {
-    return message.channel.send(`Prefix is ${db.fetch(`guildInfo_${message.author.id}.prefix`)}`)
+    return message.channel.send(`Prefix is ${db.fetch(`guildInfo_${message.guild.id}.prefix`)}`)
   }
 
   let botrole = message.guild.roles.find("name", "Bot Permissions")
@@ -86,8 +86,8 @@ bot.on("message", async message => {
         if (!args[1]) {
           return message.channel.send("You didn't specify a value.")
         }
-        db.set(`guildInfo_${message.author.id}.prefix`, args[0])
-        return message.channel.send(`The new prefix is ${db.fetch(`guildInfo_${message.author.id}.prefix`)}`)
+        db.set(`guildInfo_${message.guild.id}.prefix`, args[0])
+        return message.channel.send(`The new prefix is ${db.fetch(`guildInfo_${message.guild.id}.prefix`)}`)
       }
       if (args[0] === 'activityType') {
         if (!args[1]) {
