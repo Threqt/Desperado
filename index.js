@@ -10,8 +10,6 @@ const bot = new Discord.Client({
 const embedColor = config.embedColor
 const toMs = require('@sindresorhus/to-milliseconds')
 let prefix = '-'
-let activityType = db.fetch('activityType')
-let activity = db.fetch('activity')
 
 bot.on("ready", async () => {
   console.log(`${bot.user.username} has successfully been started.`)
@@ -91,8 +89,8 @@ bot.on("message", async message => {
       } else
       if(yes === true){
         db.set('activityType', args[1].toUpperCase())
-        bot.user.setActivity(activity, {
-          type: activityType
+        bot.user.setActivity(db.fetch('activity'), {
+          type: db.fetch('activityType')
         })
         return message.channel.send(`Set activity type to ${db.fetch('activityType')}`)
       }
@@ -103,12 +101,12 @@ bot.on("message", async message => {
       }
       let activity1 = message.content.slice(18).trim()
       db.set('activity', activity1)
-      bot.user.setActivity(activity, {
-        type: activityType
+      bot.user.setActivity(db.fetch('activity'), {
+        type: db.fetch('activityType')
       })
       return message.channel.send(`Set activity to ${db.fetch('activity')}`)
     }
   }
 })
-//18
+
 bot.login(process.env.token)
