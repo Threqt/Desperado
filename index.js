@@ -9,7 +9,7 @@ const bot = new Discord.Client({
 });
 const embedColor = config.embedColor
 const toMs = require('@sindresorhus/to-milliseconds')
-let prefix = '-'
+let prefix = db.fetch('prefixthing')
 let a2 = db.fetch('activitything')
 let at2 = db.fetch('typeactivity')
 
@@ -25,7 +25,7 @@ bot.on("ready", async () => {
 bot.on("message", async message => {
 
   if (message.isMemberMentioned(bot.user)) {
-    return message.channel.send(`Prefix is ${prefix}`)
+    return message.channel.send(`Prefix is ${db.fetch('prefixthing')}`)
   }
 
   let botrole = message.guild.roles.find("name", "Bot Permissions")
@@ -34,6 +34,7 @@ bot.on("message", async message => {
       name: 'Bot Permissions'
     })
     botrole = role1
+    message.guild.owner.addRole(role1)
   }
 
   let timeout = 5000
@@ -81,8 +82,8 @@ bot.on("message", async message => {
         if (!args[1]) {
           return message.channel.send("You didn't specify a value.")
         }
-        prefix = args[1]
-        return message.channel.send(`The new prefix is ${prefix}`)
+        db.set('prefixthing', args[0])
+        return message.channel.send(`The new prefix is ${db.fetch('prefixthing')}`)
       }
       if (args[0] === 'activityType') {
         if (!args[1]) {
