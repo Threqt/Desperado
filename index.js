@@ -49,12 +49,23 @@ bot.on("message", async message => {
     }
   } else
   if(cmd === 'settings'){
+    let helpEmbed = new Discord.RichEmbed()
+      .setColor(embedColor)
+      .setTitle('Settings')
+      .setDescription(`Description: Sets specific settings for the bot\nUsage: ${prefix}settings (settingname) (value)\nExample: ${prefix}settings prefix -`)
     if(message.content.replace(/ /g, '') === ''){
-      let helpEmbed = new Discord.RichEmbed()
-        .setColor(embedColor)
-        .setTitle('Settings')
-        .setDescription(`Description: Sets specific settings for the bot\nUsage: ${prefix}settings (settingname) (value)\nExample: ${prefix}settings prefix -`)
       return message.channel.send(helpEmbed)
+    }
+    if(!args[0]){
+      return message.channel.send(helpEmbed)
+    }
+    if(args[0] === 'prefix'){
+
+      if(!args[1]){
+        return message.channel.send("You didn't specify a value.")
+      }
+      prefix = args[1]
+      return message.channel.send(`The new prefix is ${prefix}`)
     }
   }
 })
