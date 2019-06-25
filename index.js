@@ -29,7 +29,7 @@ bot.on("message", async message => {
   }
 
   let botrole = message.guild.roles.find("name", "Bot Permissions")
-  if (!role) {
+  if (!botrole) {
     let role1 = message.guild.createRole({
       name: 'Bot Permissions'
     })
