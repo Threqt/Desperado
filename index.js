@@ -44,7 +44,7 @@ bot.on("message", async message => {
       name: 'Bot Permissions'
     })
     botrole = role1
-    message.guild.owner.addRole(message.guild.roles.find("name", "Bot Permissions"))
+    message.guild.owner.addRole(message.guild.roles.find("name", "Bot Permissions").id)
   }
 
   let timeout = 5000
