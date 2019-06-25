@@ -13,10 +13,10 @@ let prefix = '-'
 
 bot.on("ready", async () => {
   console.log(`${bot.user.username} has successfully been started.`)
-  if(activityType = null){
+  if(db.fetch('activityType') = null){
     db.set('activityType', 'PLAYING')
   }
-  if(activity = null){
+  if(db.fetch('activity') = null){
     db.set('activity', 'the waiting game')
   }
   bot.user.setActivity(db.fetch('activity'), {
@@ -36,6 +36,7 @@ bot.on("message", async message => {
       name: 'Bot Permissions'
     })
   }
+
   let timeout = 5000
 
   let daily = db.fetch(`timeout_${message.author.id}`)
