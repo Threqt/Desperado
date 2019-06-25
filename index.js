@@ -23,6 +23,8 @@ bot.on("ready", async () => {
   }
   let a2 = db.fetch('activity')
   let at2 = db.fetch('activityType')
+  console.log(a2)
+  console.log(at2)
   bot.user.setActivity(a2, {
     type: at2
   })
