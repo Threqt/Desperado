@@ -61,13 +61,13 @@ bot.on("message", async message => {
 
       return message.channel.send(`You're on cooldown. Wait ${time.seconds}s and try again.`)
     } else {
+      db.set(`timeout_${message.author.id}`, Date.now())
       let msg = await message.channel.send("Testing...")
       let pingEmbed = new Discord.RichEmbed()
         .setColor(embedColor)
         .setDescription(`⏱: ${Math.round(msg.createdAt - message.createdAt)}\n⏳: ${Math.round(bot.ping)}`)
       message.channel.send(pingEmbed)
       msg.delete()
-      db.set(`timeout_${message.author.id}`, Date.now())
     }
   } else
   if (cmd === 'settings') {
@@ -76,6 +76,7 @@ bot.on("message", async message => {
 
       return message.channel.send(`You're on cooldown. Wait ${time.seconds}s and try again.`)
     } else {
+      db.set(`timeout_${message.author.id}`, Date.now())
       if (!message.member.roles.has(botrole.id)) return message.channel.send("Insufficient Permissions")
       let helpEmbed = new Discord.RichEmbed()
         .setColor(embedColor)
@@ -136,6 +137,7 @@ bot.on("message", async message => {
 
       return message.channel.send(`You're on cooldown. Wait ${time.seconds}s and try again.`)
     } else {
+      db.set(`timeout_${message.author.id}`, Date.now())
       let commandEmbed = new Discord.RichEmbed()
         .setColor(embedColor)
         .setTitle('Bot Commands')
@@ -150,17 +152,19 @@ bot.on("message", async message => {
 
       return message.channel.send(`You're on cooldown. Wait ${time.seconds}s and try again.`)
     } else {
+      db.set(`timeout_${message.author.id}`, Date.now())
       if (!message.member.roles.has(botrole.id)) return message.channel.send("Insufficient Permissions")
-      let helpEmbed = new Discord.RichEmbed()
-        .setColor(embedColor)
-        .setTitle('tempban')
-        .setDescription(`Description: Bans a user for the set amount of time, then unbans.\nUsage: ${prefix}tempban (user) (time)\nExample: ${prefix}tempban Threqt 15d 16h 5m`)
-      if (message.content.replace(/ /g, '') === '') {
-        return message.channel.send(helpEmbed)
-      }
-      if (!args) {
-        return message.channel.send(helpEmbed)
-      }
+      message.channel.send("hi")
+      // let helpEmbed = new Discord.RichEmbed()
+      //   .setColor(embedColor)
+      //   .setTitle('tempban')
+      //   .setDescription(`Description: Bans a user for the set amount of time, then unbans.\nUsage: ${prefix}tempban (user) (time)\nExample: ${prefix}tempban Threqt 15d 16h 5m`)
+      // if (message.content.replace(/ /g, '') === '') {
+      //   return message.channel.send(helpEmbed)
+      // }
+      // if (!args) {
+      //   return message.channel.send(helpEmbed)
+      // }
   }
 }
 })
