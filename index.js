@@ -13,10 +13,10 @@ let prefix;
 
 bot.on("ready", async () => {
   console.log(`${bot.user.username} has successfully been started.`)
-  if(!db.get('activityInfo.activity')){
+  if (!db.get('activityInfo.activity')) {
     db.set('activityInfo.activity', 'the waiting game')
   }
-  if(!db.get('activityInfo.activityType')){
+  if (!db.get('activityInfo.activityType')) {
     db.set('activityInfo.activityType', 'PLAYING')
   }
   console.log(db.get('activityInfo.activityType'))
@@ -29,7 +29,7 @@ bot.on("ready", async () => {
 bot.on("message", async message => {
   prefix = db.fetch(`guildInfo_${message.guild.id}.prefix`)
 
-  if(!prefix){
+  if (!prefix) {
     db.set(`guildInfo_${message.guild.id}.prefix`, '-')
     prefix = db.fetch(`guildInfo_${message.guild.id}.prefix`)
   }
@@ -129,7 +129,59 @@ bot.on("message", async message => {
         return message.channel.send(`Set activity to ${db.get('activityInfo.activity')}`)
       }
     }
+  } else
+  if (cmd === 'commands' || cmd === 'cmd') {
+    if (daily !== null && timeout - (Date.now() - daily) > 0) {
+      let time = ms(timeout - (Date.now() - daily))
+
+      return message.channel.send(`You're on cooldown. Wait ${time.seconds}s and try again.`)
+    } else {
+      let commandEmbed = new Discord.RichEmbed()
+        .setColor(embedColor)
+        .setTitle('Bot Commands')
+        .setDescription('**settings:** Sets specific settings for the bot (BOT PERMISSIONS)\n\n**ping:** Checks latency and api latency\n\n')
+      let dmChannel = await message.author.createDM()
+      dmChannel.send(commandEmbed)
+    }
+  } else
+  if(cmd === `tempban`){
+    if (daily !== null && timeout - (Date.now() - daily) > 0) {
+      let time = ms(timeout - (Date.now() - daily))
+
+      return message.channel.send(`You're on cooldown. Wait ${time.seconds}s and try again.`)
+    } else {
+    let helpEmbed = new Discord.RichEmbed()
+      .setColor(embedColor)
+      .setTitle('tempban')
+      .setDescription(`Description: Bans a user for the set amount of time, then unbans.\nUsage: ${prefix}tempban (user) (time)\nExample: ${prefix}tempban Threqt 15d 16h 5m`)
+    if(message.content.replace(/ /g, '') === ''){
+      return message.channel.send(helpEmbed)
+    }
+    if(!args){
+      return message.channel.send(helpEmbed)
+    }
+    for (const arg of args) {
+      let types = ['d', 'h', 'm', 's', 'ms']
+      let argarr = []
+      let newarg = arg.trim().replace(/ /g, '')
+      for(i = 0; i < arg.length; i++){
+        argarr.push(newarg.charAt(i))
+      }
+      console.log(argarr)
+      let last = argarr.pop()
+      console.log(last)
+      let match = false
+      for(const type of types){
+        if(last.toLowerCase() == type.toLowerCase()){
+          match = true
+        }
+      }
+      if(match = false){
+        return message.channel.send("One or more arguments are malformed")
+      }
+    }
   }
+}
 })
 
 bot.login(process.env.token)
