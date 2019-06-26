@@ -161,28 +161,30 @@ bot.on("message", async message => {
       if (!args) {
         return message.channel.send(helpEmbed)
       }
-      for (const arg of args) {
-        let types = ['d', 'h', 'm', 's', 'ms']
-        let argarr = []
-        let newarg = arg.trim().replace(/ /g, '')
-        for (i = 0; i < arg.length; i++) {
-          argarr.push(newarg.charAt(i))
-        }
-        console.log(argarr)
-        let last = argarr.pop()
-        console.log(last)
-        let match = false
-        for (const type of types) {
-          if (last.toLowerCase() == type.toLowerCase()) {
-            match = true
-          }
-        }
-        if (match = false) {
-          return message.channel.send("One or more arguments are malformed")
-        }
-      }
-    }
   }
+}
 })
+
+// for (const arg of args) {
+//   let types = ['d', 'h', 'm', 's', 'ms']
+//   let argarr = []
+//   let newarg = arg.trim().replace(/ /g, '')
+//   for (i = 0; i < arg.length; i++) {
+//     argarr.push(newarg.charAt(i))
+//   }
+//   console.log(argarr)
+//   let last = argarr.pop()
+//   console.log(last)
+//   let match = false
+//   for (const type of types) {
+//     if (last.toLowerCase() == type.toLowerCase()) {
+//       match = true
+//     }
+//   }
+//   if (match = false) {
+//     return message.channel.send("One or more arguments are malformed")
+//   }
+// }
+// }
 
 bot.login(process.env.token)
