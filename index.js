@@ -27,15 +27,15 @@ bot.on("ready", async () => {
 })
 
 bot.on("message", async message => {
-  prefix = db.fetch(`guildInfo_${message.guild.id}.prefix`)
+  prefix = db.fetch(`guildInfo_${message.member.guild.id}.prefix`)
 
   if (!prefix) {
-    db.set(`guildInfo_${message.guild.id}.prefix`, '-')
+    db.set(`guildInfo_${message.member.guild.id}.prefix`, '-')
     prefix = db.fetch(`guildInfo_${message.guild.id}.prefix`)
   }
 
   if (message.isMemberMentioned(bot.user)) {
-    return message.channel.send(`Prefix is ${db.fetch(`guildInfo_${message.guild.id}.prefix`)}`)
+    return message.channel.send(`Prefix is ${db.fetch(`guildInfo_${message.member.guild.id}.prefix`)}`)
   }
 
   let botrole = message.guild.roles.find("name", "Bot Permissions")
@@ -92,8 +92,8 @@ bot.on("message", async message => {
         if (!args[1]) {
           return message.channel.send("You didn't specify a value.")
         }
-        db.set(`guildInfo_${message.guild.id}.prefix`, args[0])
-        return message.channel.send(`The new prefix is ${db.fetch(`guildInfo_${message.guild.id}.prefix`)}`)
+        db.set(`guildInfo_${message.member.guild.id}.prefix`, args[0])
+        return message.channel.send(`The new prefix is ${db.fetch(`guildInfo_${message.member.guild.id}.prefix`)}`)
       }
       if (args[0] === 'activityType') {
         if (!args[1]) {
