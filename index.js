@@ -154,17 +154,16 @@ bot.on("message", async message => {
     } else {
       db.set(`timeout_${message.author.id}`, Date.now())
       if (!message.member.roles.has(botrole.id)) return message.channel.send("Insufficient Permissions")
-      message.channel.send("hi")
-      // let helpEmbed = new Discord.RichEmbed()
-      //   .setColor(embedColor)
-      //   .setTitle('tempban')
-      //   .setDescription(`Description: Bans a user for the set amount of time, then unbans.\nUsage: ${prefix}tempban (user) (time)\nExample: ${prefix}tempban Threqt 15d 16h 5m`)
-      // if (message.content.replace(/ /g, '') === '') {
-      //   return message.channel.send(helpEmbed)
-      // }
-      // if (!args) {
-      //   return message.channel.send(helpEmbed)
-      // }
+      let helpEmbed = new Discord.RichEmbed()
+        .setColor(embedColor)
+        .setTitle('tempban')
+        .setDescription(`Description: Bans a user for the set amount of time, then unbans.\nUsage: ${prefix}tempban (user) (time)\nExample: ${prefix}tempban Threqt 15d 16h 5m`)
+      if (message.content.replace(/ /g, '') === '') {
+        return message.channel.send(helpEmbed)
+      }
+      if (!args) {
+        return message.channel.send(helpEmbed)
+      }
   }
 }
 })
