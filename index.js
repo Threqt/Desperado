@@ -144,7 +144,7 @@ bot.on("message", async message => {
       dmChannel.send(commandEmbed)
     }
   } else
-  if (cmd === `tempban`) {
+  if (cmd === `tban`) {
     if (daily !== null && timeout - (Date.now() - daily) > 0) {
       let time = ms(timeout - (Date.now() - daily))
 
