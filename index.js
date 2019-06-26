@@ -144,44 +144,45 @@ bot.on("message", async message => {
       dmChannel.send(commandEmbed)
     }
   } else
-  if(cmd === `tempban`){
+  if (cmd === `tempban`) {
     if (daily !== null && timeout - (Date.now() - daily) > 0) {
       let time = ms(timeout - (Date.now() - daily))
 
       return message.channel.send(`You're on cooldown. Wait ${time.seconds}s and try again.`)
     } else {
-    let helpEmbed = new Discord.RichEmbed()
-      .setColor(embedColor)
-      .setTitle('tempban')
-      .setDescription(`Description: Bans a user for the set amount of time, then unbans.\nUsage: ${prefix}tempban (user) (time)\nExample: ${prefix}tempban Threqt 15d 16h 5m`)
-    if(message.content.replace(/ /g, '') === ''){
-      return message.channel.send(helpEmbed)
-    }
-    if(!args){
-      return message.channel.send(helpEmbed)
-    }
-    for (const arg of args) {
-      let types = ['d', 'h', 'm', 's', 'ms']
-      let argarr = []
-      let newarg = arg.trim().replace(/ /g, '')
-      for(i = 0; i < arg.length; i++){
-        argarr.push(newarg.charAt(i))
+      if (!message.member.roles.has(botrole.id)) return message.channel.send("Insufficient Permissions")
+      let helpEmbed = new Discord.RichEmbed()
+        .setColor(embedColor)
+        .setTitle('tempban')
+        .setDescription(`Description: Bans a user for the set amount of time, then unbans.\nUsage: ${prefix}tempban (user) (time)\nExample: ${prefix}tempban Threqt 15d 16h 5m`)
+      if (message.content.replace(/ /g, '') === '') {
+        return message.channel.send(helpEmbed)
       }
-      console.log(argarr)
-      let last = argarr.pop()
-      console.log(last)
-      let match = false
-      for(const type of types){
-        if(last.toLowerCase() == type.toLowerCase()){
-          match = true
+      if (!args) {
+        return message.channel.send(helpEmbed)
+      }
+      for (const arg of args) {
+        let types = ['d', 'h', 'm', 's', 'ms']
+        let argarr = []
+        let newarg = arg.trim().replace(/ /g, '')
+        for (i = 0; i < arg.length; i++) {
+          argarr.push(newarg.charAt(i))
         }
-      }
-      if(match = false){
-        return message.channel.send("One or more arguments are malformed")
+        console.log(argarr)
+        let last = argarr.pop()
+        console.log(last)
+        let match = false
+        for (const type of types) {
+          if (last.toLowerCase() == type.toLowerCase()) {
+            match = true
+          }
+        }
+        if (match = false) {
+          return message.channel.send("One or more arguments are malformed")
+        }
       }
     }
   }
-}
 })
 
 bot.login(process.env.token)
