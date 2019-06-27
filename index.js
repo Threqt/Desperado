@@ -11,6 +11,168 @@ const embedColor = config.embedColor
 const toMs = require('@sindresorhus/to-milliseconds')
 let prefix;
 const pMs = require('pretty-ms')
+const Enmap = require('enmap')
+const Long = require('long')
+
+bot.settings = new Enmap({
+  name: "settings",
+  fetchAll: false,
+  autoFetch: true,
+  cloneLevel: 'deep'
+});
+
+async function suggestion(bot, message) {
+  message.channel.send("Check DMs.")
+  let dmChannel = await message.author.createDM()
+  dmChannel.send("Please type your suggestion here, you have 20 minutes. Use cancel to cancel.")
+  const filter = m => m.author.id === message.author.id;
+  let collected = await dmChannel.awaitMessages(filter, {
+    max: 1,
+    time: 1200000,
+    errors: ['time']
+  }).catch(err => {
+    if (err.reason = 'time') {
+      return dmChannel.send("Timed out.")
+    }
+  })
+  let message1 = collected.first().content
+  if (message1.toLowerCase() == 'cancel') {
+    return dmChannel.send("Cancelled")
+  }
+  dmChannel.send("Your suggestion has been recorded")
+  let embed = new Discord.RichEmbed()
+    .setColor("GREEN")
+    .setTitle(`Suggestion by ${message.author.username}#${message.author.discriminator}`)
+    .setDescription(message1)
+  let found = await message.guild.channels.find(function(element) {
+    return element.name === 'suggestions-voting-channel'
+  })
+  if (found == 'undefined') {
+    message.channel.send("Cannot send the suggestion as the guild lacks a suggestion voting channel.")
+    throw `The guild ${message.guild.name} does not have a suggestions voting channel.`;
+  }
+  found.send(embed).then(async msg => {
+    await msg.react('👍')
+    await msg.react('👎')
+
+    let agree = '👍'
+    let disagree = '👎'
+
+    const filter = reaction => reaction.emoji.name === agree || reaction.emoji.name === disagree
+    let collector = msg.createReactionCollector(filter, {
+      time: 86400000
+    })
+    collector.on('collect', async reaction => {
+      let found3 = msg.reactions.find(function(element) {
+        return element.emoji.name == agree
+      })
+      if (found3 == null) {
+        throw 'Something went wrong or there are 0 reactions for agree!'
+      }
+      let found9 = msg.reactions.find(function(element) {
+        return element.emoji.name == disagree
+      })
+      if (found9 == null) {
+        throw 'Something went wrong or there are 0 reactions for agree!'
+      }
+      let emojicount = found3.count
+      let emojicount2 = found9.count
+      let successEmbed = new Discord.RichEmbed()
+        .setColor("GREEN")
+        .setDescription(`${message.author.username}#${message.author.discriminator}'s suggestion has automatically passed due to 5 reactions!`)
+      let antiSuccessEmbed = new Discord.RichEmbed()
+        .setColor("RED")
+        .setDescription(`${message.author.username}#${message.author.discriminator}'s suggestion has automatically been rejected due to 5 reactions!`)
+      if (emojicount == 5) {
+        msg.channel.send(successEmbed)
+        return suggestion2(bot, message, embed, message1)
+      }
+      if (emojicount2 == 5) {
+        return msg.channel.send(antiSuccessEmbed)
+      }
+    })
+    collector.on('end', async collected => {
+      let found1 = msg.reactions.find(function(element) {
+        return element.emoji.name == agree
+      })
+      let found2 = msg.reactions.find(function(element) {
+        return element.emoji.name == disagree
+      })
+      if (found1.count > found2.count) {
+        let successEmbed2 = new Discord.RichEmbed()
+          .setColor("GREEN")
+          .setDescription(`${message.author.username}#${message.author.discriminator}'s suggestion has passed because it got ${found1.count} upvotes and ${found2.count} downvotes!`)
+        msg.channel.send(successEmbed1)
+        return suggestion2(bot, message, embed, message1)
+      } else
+      if (found1.count <= found2.count) {
+        let rejectEmbed = new Discord.RichEmbed()
+          .setColor("RED")
+          .setDescription((`Suggestion by ${message.author.username}#${message.author.discriminator} has been rejected due to lack of positive reactions.`))
+        return msg.channel.send(rejectEmbed)
+      }
+    })
+  })
+}
+
+async function suggestion2(bot, message, embed, suggestion) {
+  let found4 = await message.guild.channels.find(function(element) {
+    return element.name === 'suggestions-voting-public'
+  })
+  if (found4 == 'undefined') {
+    message.channel.send("Cannot send the suggestion as the guild lacks a suggestion public voting channel.")
+    throw `The guild ${message.guild.name} does not have a suggestions public voting channel.`;
+  }
+  await found4.send(embed).then(async msg => {
+    await msg.react('👍')
+    await msg.react('👎')
+
+    let agree = '👍'
+    let disagree = '👎'
+
+    const filter = reaction => reaction.emoji.name === agree || reaction.emoji.name === disagree
+    let collected = await msg.awaitReactions(filter, {
+      time: 86400000
+    })
+    let found5 = msg.reactions.find(function(element) {
+      return element.emoji.name == agree
+    })
+    let found6 = msg.reactions.find(function(element) {
+      return element.emoji.name == disagree
+    })
+    let collectedEmbed = new Discord.RichEmbed()
+      .setColor("GREEN")
+      .setTitle(`RESULTS FOR THE SUGGESTION BY ${message.author.username}#${message.author.discriminator}`)
+      .setDescription(`Suggestion: ${suggestion}`)
+      .addField('👍', found5.count - 1)
+      .addField('👎', found6.count - 1)
+    let found7 = await message.guild.channels.find(function(element) {
+      return element.name === 'approved-poll-votes'
+    })
+    if (found7 == 'undefined') {
+      message.channel.send("Cannot send the suggestion as the guild lacks a suggestion public voting results channel.")
+      throw `The guild ${message.guild.name} does not have a suggestions public voting results channel.`;
+    }
+    found7.send(collectedEmbed)
+  })
+}
+
+const getDefaultChannel = (guild) => {
+
+  if (guild.channels.has(guild.id))
+    return guild.channels.get(guild.id)
+
+  const generalChannel = guild.channels.find(channel => channel.name === "general");
+  if (generalChannel)
+    return generalChannel;
+
+  return guild.channels
+    .filter(c => c.type === "text" &&
+      c.permissionsFor(guild.client.user).has("SEND_MESSAGES"))
+    .sort((a, b) => a.position - b.position ||
+      Long.fromString(a.id).sub(Long.fromString(b.id)).toNumber())
+    .first();
+}
 
 bot.on("ready", async () => {
   console.log(`${bot.user.username} has successfully been started.`)
@@ -27,23 +189,24 @@ bot.on("ready", async () => {
   })
   bot.setInterval(() => {
     let bans = db.fetch('tempbans')
-    if(bans == null){
+    if (bans == null) {
       return
     }
     var tbans = Object.entries(bans)
-    for(var [dude, info] of tbans){
+    for (var [dude, info] of tbans) {
       let time = info.time
       let userid = dude
       let guildid = info.guild
-      let guild =  bot.guilds.get(guildid)
+      let guild = bot.guilds.get(guildid)
       let user = info.user
+      let channel = getDefaultChannel(guild)
 
-      if(Date.now() > time){
+      if (Date.now() > time) {
         db.delete(`tempbans.${userid}`)
         try {
           guild.unban(dude)
-        } catch(e) {
-          guild.systemChannel.send(`I tried to unban ${user.user.username} but I either do not have permission or he/she is unbanned.`)
+        } catch (e) {
+          channel.send(`I tried to unban ${user.user.username} but I either do not have permission or he/she is unbanned.`)
           continue;
         }
         let logEmbed = new Discord.RichEmbed()
@@ -51,12 +214,13 @@ bot.on("ready", async () => {
           .setDescription('Unbanned user ' + user.user.username + ' because their tempban duration was over.')
           .addField('User ID', user.user.id)
           .addField('Duration', info.realtime)
-        let channel = guild.channels.find("name", "unban-logs")
+        let channela = guild.channels.find("name", "unban-logs")
         try {
+          channela.send(logEmbed)
+        } catch (e) {
+
+          channel.send(`I tried to send the unban log but there is either no channel or I have no permission to view it, so I will send the log here.`)
           channel.send(logEmbed)
-        } catch(e) {
-          guild.systemChannel.send(`I tried to send the unban log but there is either no channel or I have no permission to view it, so I will send the log here.`)
-          guild.systemChannel.send(logEmbed)
         }
       }
     }
@@ -323,6 +487,9 @@ bot.on("message", async message => {
         }
       })
     }
+  } else
+  if(cmd === `suggest`){
+    suggestion(bot, message)
   }
 })
 
