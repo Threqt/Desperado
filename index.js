@@ -645,17 +645,12 @@ bot.on("message", async message => {
           });
 
           let channels = message.member.guild.channels
-          for (var channel of channels) {
-            try {
-              channel.overwritePermissions(role, {
-                SEND_MESSAGES: false,
-                ADD_REACTIONS: false
-              })
-            } catch (e) {
-              console.log(e.stack)
-              return message.channel.send('You did not have a muted role and I failed to create one. Exiting out of command...')
-            }
-          }
+          message.guild.channels.forEach(channel => {
+            channel.overwritePermissions(role, {
+              SEND_MESSAGES: false,
+              ADD_REACTIONS: false
+            })
+          })
         } catch (e) {
           console.log(e.stack)
           message.channel.send("Failed to find muted role, I tried to create one. This role will be assigned to the muted person.")
