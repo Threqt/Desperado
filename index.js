@@ -10,6 +10,7 @@ const bot = new Discord.Client({
 const embedColor = config.embedColor
 const toMs = require('@sindresorhus/to-milliseconds')
 let prefix;
+const pMs = require('pretty-ms')
 
 bot.on("ready", async () => {
   console.log(`${bot.user.username} has successfully been started.`)
@@ -24,6 +25,42 @@ bot.on("ready", async () => {
   bot.user.setActivity(db.get('activityInfo.activity'), {
     type: db.get('activityInfo.activityType')
   })
+  bot.setInterval(() => {
+    let bans = db.fetch('tempbans')
+    if(bans == null){
+      return
+    }
+    var tbans = Object.entries(bans)
+    for(var [dude, info] of tbans){
+      let time = info.time
+      let userid = dude
+      let guildid = info.guild
+      let guild =  bot.guilds.get(guildid)
+      let user = info.user
+
+      if(Date.now() > time){
+        db.delete(`tempbans.${userid}`)
+        try {
+          guild.unban(dude)
+        } catch(e) {
+          guild.systemChannel.send(`I tried to unban ${user.user.username} but I either do not have permission or he/she is unbanned.`)
+          continue;
+        }
+        let logEmbed = new Discord.RichEmbed()
+          .setColor(embedColor)
+          .setDescription('Unbanned user ' + user.user.username + ' because their tempban duration was over.')
+          .addField('User ID', user.user.id)
+          .addField('Duration', info.realtime)
+        let channel = guild.channels.find("name", "unban-logs")
+        try {
+          channel.send(logEmbed)
+        } catch(e) {
+          guild.systemChannel.send(`I tried to send the unban log but there is either no channel or I have no permission to view it, so I will send the log here.`)
+          guild.systemChannel.send(logEmbed)
+        }
+      }
+    }
+  }, 5000)
 })
 
 bot.on("message", async message => {
@@ -82,7 +119,7 @@ bot.on("message", async message => {
         .setColor(embedColor)
         .setTitle('Settings')
         .setDescription(`Description: Sets specific settings for the bot. Settings: prefix, activity, activityType\nUsage: ${prefix}settings (settingname) (value)\nExample: ${prefix}settings prefix -`)
-      if (message.content.replace(/ /g, '') === '') {
+      if (message.content.trim().slice(cmd.length + 1).replace(/ /g, '') === '') {
         return message.channel.send(helpEmbed)
       }
       if (!args[0]) {
@@ -141,12 +178,12 @@ bot.on("message", async message => {
       let commandEmbed = new Discord.RichEmbed()
         .setColor(embedColor)
         .setTitle('Bot Commands')
-        .setDescription('**settings:** Sets specific settings for the bot (BOT PERMISSIONS)\n\n**ping:** Checks latency and api latency\n\n')
+        .setDescription('**settings:** Sets specific settings for the bot (BOT PERMISSIONS)\n\n**ping:** Checks latency and api latency\n\n**tban:** Temporarily bans a person for the set amount of time (BOT PERMISSIONS ONLY)')
       let dmChannel = await message.author.createDM()
       dmChannel.send(commandEmbed)
     }
   } else
-  if (cmd === `tban`) {
+  if (cmd === 'tban') {
     if (daily !== null && timeout - (Date.now() - daily) > 0) {
       let time = ms(timeout - (Date.now() - daily))
 
@@ -157,15 +194,136 @@ bot.on("message", async message => {
       let helpEmbed = new Discord.RichEmbed()
         .setColor(embedColor)
         .setTitle('tempban')
-        .setDescription(`Description: Bans a user for the set amount of time, then unbans.\nUsage: ${prefix}tempban (user) (time)\nExample: ${prefix}tempban Threqt 15d 16h 5m`)
-      if (message.content.replace(/ /g, '') === '') {
+        .setDescription(`Description: Bans a user for the set amount of time, then unbans.\nUsage: ${config.prefix}tempban (user) (time)\nExample: ${config.prefix}tempban Threqt 15d 16h 5m`)
+      if (message.content.trim().slice(cmd.length + 1).replace(/ /g, '') === '') {
         return message.channel.send(helpEmbed)
       }
-      if (!args) {
-        return message.channel.send(helpEmbed)
+      if (message.mentions.users.size === 0) {
+        return message.channel.send("Please mention a user.")
       }
+      let tbanmemb = message.guild.member(message.mentions.users.first())
+      if (!tbanmemb) {
+        return message.channel.send("Please mention a valid user.")
+      }
+      if (tbanmemb.highestRole.position >= message.member.highestRole.position) {
+        return message.channel.send("Person is of a higher rank than you.")
+      }
+      console.log(args)
+      console.log(message.mentions.users.size)
+      var newargs = await args.shift()
+      if (args.length == 0) {
+        return message.channel.send("Please specify the time for ban.")
+      }
+      console.log(args)
+      for (const arg of args) {
+        let types = ['d', 'h', 'm', 's', 'ms']
+        let argarr = []
+        let newarg = arg.trim().replace(/ /g, '')
+        for (i = 0; i < arg.length; i++) {
+          argarr.push(newarg.charAt(i))
+        }
+        let last = argarr.pop()
+        let match = false
+        for (const type of types) {
+          if (last.toLowerCase() == type.toLowerCase()) {
+            match = true
+          }
+        }
+        if (match == false) {
+          return message.channel.send('Malformed Argument: ' + arg)
+        }
+        globaltrue = []
+        for (const char of argarr) {
+          let valid = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+          let match2 = false
+          for (const val of valid) {
+            if (char == val) {
+              match2 = true
+            }
+          }
+          if (match2 == false) {
+            return message.channel.send('Malformed Argument: ' + arg)
+          }
+        }
+      }
+      let msarr = []
+      for (const arg of args) {
+        let desc = ''
+        let argarr1 = []
+        let newarg1 = arg.trim().replace(/ /g, '')
+        for (i = 0; i < arg.length; i++) {
+          argarr1.push(newarg1.charAt(i))
+        }
+        let indentifier = argarr1.pop()
+        let numbval = parseInt(argarr1.join(''))
+        let types1 = ['d', 'h', 'm', 's', 'ms']
+        switch (indentifier) {
+          case 'd':
+            msarr.push(toMs({
+              days: numbval
+            }))
+            break;
+          case 'h':
+            msarr.push(toMs({
+              hours: numbval
+            }))
+            break;
+          case 'm':
+            msarr.push(toMs({
+              minutes: numbval
+            }))
+            break;
+          case 's':
+            msarr.push(toMs({
+              seconds: numbval
+            }))
+            break;
+          case 'h':
+            msarr.push(numbval)
+            break;
+        }
+      }
+      const arrSum = arr => arr.reduce((a, b) => a + b, 0)
+      let totalMs = arrSum(msarr)
+      message.channel.send("Please specify the reason you're banning this user.")
+      const filter = m => message.author.id === m.author.id;
+      let collected = await message.channel.awaitMessages(filter, {
+        max: 1,
+        time: toMs({
+          minutes: 20
+        }),
+        errors: ['time']
+      }).catch(error => {
+        if (error.reason === 'time') {
+          return message.channel.send('Timed out.')
+        }
+      })
+      let reason = collected.first().content
+      await tbanmemb.ban().then(async member => {
+        let tbanobj = {
+          user: tbanmemb,
+          guild: message.member.guild.id,
+          time: Date.now() + totalMs,
+          realtime: pMs(totalMs)
+        }
+        db.set(`tempbans.${tbanmemb.user.id}`, tbanobj)
+        message.channel.send(`Successfully tempbanned ${tbanmemb.displayName} for ${pMs(totalMs)}`)
+        let logEmbed = new Discord.RichEmbed()
+          .setColor(embedColor)
+          .setDescription('User ' + tbanmemb.displayName + ' has been temp banned by ' + message.member.displayName + '.')
+          .addField('User Banned', tbanmemb.displayName)
+          .addField('User who Banned', message.member.displayName)
+          .addField('Duration', pMs(totalMs))
+        let channel = await message.member.guild.channels.find("name", "ban-logs")
+        try {
+          channel.send(logEmbed)
+        } catch (e) {
+          message.channel.send('An error occurred, probably because the channel ban-logs does not exist. I will post the log here instead.')
+          return message.channel.send(logEmbed)
+        }
+      })
+    }
   }
-}
 })
 
 // for (const arg of args) {
