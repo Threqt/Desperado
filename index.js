@@ -661,7 +661,7 @@ bot.on("message", async message => {
           message.channel.send("Failed to find muted role, I tried to create one. This role will be assigned to the muted person.")
         }
       }
-      await mutememb.addRole(muterole).then(async member => {
+      await mutememb.addRole(muteRole).then(async member => {
         let muteobj = {
           user: mutememb,
           guild: message.member.guild.id,
