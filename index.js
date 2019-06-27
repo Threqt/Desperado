@@ -188,77 +188,77 @@ bot.on("ready", async () => {
     type: db.get('activityInfo.activityType')
   })
   bot.setInterval(() => {
-      let bans = db.fetch('tempbans')
-      if (bans == null) {
-        return
-      }
-      var tbans = Object.entries(bans)
-      for (var [dude, info] of tbans) {
-        let time = info.time
-        let userid = dude
-        let guildid = info.guild
-        let guild = bot.guilds.get(guildid)
-        let user = info.user
-        let channel = getDefaultChannel(guild)
+    let bans = db.fetch('tempbans')
+    if (bans == null) {
+      return
+    }
+    var tbans = Object.entries(bans)
+    for (var [dude, info] of tbans) {
+      let time = info.time
+      let userid = dude
+      let guildid = info.guild
+      let guild = bot.guilds.get(guildid)
+      let user = info.user
+      let channel = getDefaultChannel(guild)
 
-        if (Date.now() > time) {
-          db.delete(`tempbans.${userid}`)
-          try {
-            guild.unban(dude)
-          } catch (e) {
-            channel.send(`I tried to unban ${user.user.username} but I either do not have permission or he/she is unbanned.`)
-            continue;
-          }
-          let logEmbed = new Discord.RichEmbed()
-            .setColor(embedColor)
-            .setDescription('Unbanned user ' + user.user.username + ' because their tempban duration was over.')
-            .addField('User ID', user.user.id)
-            .addField('Duration', info.realtime)
-          let channela = guild.channels.find("name", "unban-logs")
-          try {
-            channela.send(logEmbed)
-          } catch (e) {
-            channel.send(`I tried to send the unban log but there is either no channel or I have no permission to view it, so I will send the log here.`)
-            channel.send(logEmbed)
-          }
+      if (Date.now() > time) {
+        db.delete(`tempbans.${userid}`)
+        try {
+          guild.unban(dude)
+        } catch (e) {
+          channel.send(`I tried to unban ${user.user.username} but I either do not have permission or he/she is unbanned.`)
+          continue;
+        }
+        let logEmbed = new Discord.RichEmbed()
+          .setColor(embedColor)
+          .setDescription('Unbanned user ' + user.user.username + ' because their tempban duration was over.')
+          .addField('User ID', user.user.id)
+          .addField('Duration', info.realtime)
+        let channela = guild.channels.find("name", "unban-logs")
+        try {
+          channela.send(logEmbed)
+        } catch (e) {
+          channel.send(`I tried to send the unban log but there is either no channel or I have no permission to view it, so I will send the log here.`)
+          channel.send(logEmbed)
         }
       }
-      let mutes = db.fetch('mutes')
-      if (mutes == null) {
-        return
-      }
-      var tmutes = Object.entries(mutes)
-      for (var [dude, info] of tmutes) {
-        let time = info.time
-        let userid = dude
-        let guildid = info.guild
-        let guild = bot.guilds.get(guildid)
-        let user = info.user
-        let channel = getDefaultChannel(guild)
-        let muterole = info.role
+    }
+    let mutes = db.fetch('mutes')
+    if (mutes == null) {
+      return
+    }
+    var tmutes = Object.entries(mutes)
+    for (var [dude, info] of tmutes) {
+      let time = info.time
+      let userid = dude
+      let guildid = info.guild
+      let guild = bot.guilds.get(guildid)
+      let user = info.user
+      let channel = getDefaultChannel(guild)
+      let muterole = info.role
 
-        if (Date.now() > time) {
-          db.delete(`mutes.${userid}`)
-          try {
-            user.removeRole(muterole)
-          } catch (e) {
-            channel.send(`Could not unmute ${user.user.username} due to an error.`)
-            continue;
-          }
-          let logEmbed = new Discord.RichEmbed()
-            .setColor(embedColor)
-            .setDescription('Unmuted user ' + user.user.username + ' because their mute duration was over.')
-            .addField('User ID', user.user.id)
-            .addField('Duration', info.realtime)
-          let channela = guild.channels.find("name", "mute-logs")
-          try {
-            channela.send(logEmbed)
-          } catch (e) {
-            channel.send(`I tried to send the unmute log but there is either no channel or I have no permission to view it, so I will send the log here.`)
-            channel.send(logEmbed)
-          }
+      if (Date.now() > time) {
+        db.delete(`mutes.${userid}`)
+        try {
+          user.removeRole(muterole)
+        } catch (e) {
+          channel.send(`Could not unmute ${user.user.username} due to an error.`)
+          continue;
+        }
+        let logEmbed = new Discord.RichEmbed()
+          .setColor(embedColor)
+          .setDescription('Unmuted user ' + user.user.username + ' because their mute duration was over.')
+          .addField('User ID', user.user.id)
+          .addField('Duration', info.realtime)
+        let channela = guild.channels.find("name", "mute-logs")
+        try {
+          channela.send(logEmbed)
+        } catch (e) {
+          channel.send(`I tried to send the unmute log but there is either no channel or I have no permission to view it, so I will send the log here.`)
+          channel.send(logEmbed)
         }
       }
+    }
   }, 5000)
 })
 
@@ -636,7 +636,7 @@ bot.on("message", async message => {
         }
       })
       let reason = collected.first().content
-      var muteRole = message.member.guild.roles.find("name", "Muted")
+      let muteRole = message.guild.roles.find("name", "Muted")
       if (!muteRole) {
         try {
           muteRole = await message.member.guild.createRole({
@@ -652,10 +652,12 @@ bot.on("message", async message => {
                 ADD_REACTIONS: false
               })
             } catch (e) {
+              console.log(e.stack)
               return message.channel.send('You did not have a muted role and I failed to create one. Exiting out of command...')
             }
           }
         } catch (e) {
+          console.log(e.stack)
           message.channel.send("Failed to find muted role, I tried to create one. This role will be assigned to the muted person.")
         }
       }
