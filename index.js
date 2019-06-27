@@ -188,39 +188,75 @@ bot.on("ready", async () => {
     type: db.get('activityInfo.activityType')
   })
   bot.setInterval(() => {
-    let bans = db.fetch('tempbans')
-    if (bans == null) {
-      return
-    }
-    var tbans = Object.entries(bans)
-    for (var [dude, info] of tbans) {
-      let time = info.time
-      let userid = dude
-      let guildid = info.guild
-      let guild = bot.guilds.get(guildid)
-      let user = info.user
-      let channel = getDefaultChannel(guild)
+      let bans = db.fetch('tempbans')
+      if (bans == null) {
+        return
+      }
+      var tbans = Object.entries(bans)
+      for (var [dude, info] of tbans) {
+        let time = info.time
+        let userid = dude
+        let guildid = info.guild
+        let guild = bot.guilds.get(guildid)
+        let user = info.user
+        let channel = getDefaultChannel(guild)
 
-      if (Date.now() > time) {
-        db.delete(`tempbans.${userid}`)
-        try {
-          guild.unban(dude)
-        } catch (e) {
-          channel.send(`I tried to unban ${user.user.username} but I either do not have permission or he/she is unbanned.`)
-          continue;
+        if (Date.now() > time) {
+          db.delete(`tempbans.${userid}`)
+          try {
+            guild.unban(dude)
+          } catch (e) {
+            channel.send(`I tried to unban ${user.user.username} but I either do not have permission or he/she is unbanned.`)
+            continue;
+          }
+          let logEmbed = new Discord.RichEmbed()
+            .setColor(embedColor)
+            .setDescription('Unbanned user ' + user.user.username + ' because their tempban duration was over.')
+            .addField('User ID', user.user.id)
+            .addField('Duration', info.realtime)
+          let channela = guild.channels.find("name", "unban-logs")
+          try {
+            channela.send(logEmbed)
+          } catch (e) {
+            channel.send(`I tried to send the unban log but there is either no channel or I have no permission to view it, so I will send the log here.`)
+            channel.send(logEmbed)
+          }
         }
-        let logEmbed = new Discord.RichEmbed()
-          .setColor(embedColor)
-          .setDescription('Unbanned user ' + user.user.username + ' because their tempban duration was over.')
-          .addField('User ID', user.user.id)
-          .addField('Duration', info.realtime)
-        let channela = guild.channels.find("name", "unban-logs")
-        try {
-          channela.send(logEmbed)
-        } catch (e) {
+      }
+      let mutes = db.fetch('mutes')
+      if (mutes == null) {
+        return
+      }
+      var tmutes = Object.entries(mutes)
+      for (var [dude, info] of tmutes) {
+        let time = info.time
+        let userid = dude
+        let guildid = info.guild
+        let guild = bot.guilds.get(guildid)
+        let user = info.user
+        let channel = getDefaultChannel(guild)
+        let muterole = info.role
 
-          channel.send(`I tried to send the unban log but there is either no channel or I have no permission to view it, so I will send the log here.`)
-          channel.send(logEmbed)
+        if (Date.now() > time) {
+          db.delete(`mutes.${userid}`)
+          try {
+            user.removeRole(muterole)
+          } catch (e) {
+            channel.send(`Could not unmute ${user.user.username} due to an error.`)
+            continue;
+          }
+          let logEmbed = new Discord.RichEmbed()
+            .setColor(embedColor)
+            .setDescription('Unmuted user ' + user.user.username + ' because their mute duration was over.')
+            .addField('User ID', user.user.id)
+            .addField('Duration', info.realtime)
+          let channela = guild.channels.find("name", "mute-logs")
+          try {
+            channela.send(logEmbed)
+          } catch (e) {
+            channel.send(`I tried to send the unmute log but there is either no channel or I have no permission to view it, so I will send the log here.`)
+            channel.send(logEmbed)
+          }
         }
       }
     }
@@ -342,7 +378,7 @@ bot.on("message", async message => {
       let commandEmbed = new Discord.RichEmbed()
         .setColor(embedColor)
         .setTitle('Bot Commands')
-        .setDescription('**settings:** Sets specific settings for the bot (BOT PERMISSIONS)\n\n**ping:** Checks latency and api latency\n\n**tban:** Temporarily bans a person for the set amount of time (BOT PERMISSIONS ONLY)')
+        .setDescription('**settings:** Sets specific settings for the bot (BOT PERMISSIONS)\n\n**ping:** Checks latency and api latency\n\n**tban:** Temporarily bans a person for the set amount of time (BOT PERMISSIONS ONLY)\n\n**suggest:** Creates a suggestion which can be viewed by the community after being voted on by the administration\n\n**mute:** Mutes a user for a certain period of time (BOT PERMISSIONS ONLY)')
       let dmChannel = await message.author.createDM()
       dmChannel.send(commandEmbed)
     }
@@ -372,13 +408,10 @@ bot.on("message", async message => {
       if (tbanmemb.highestRole.position >= message.member.highestRole.position) {
         return message.channel.send("Person is of a higher rank than you.")
       }
-      console.log(args)
-      console.log(message.mentions.users.size)
       var newargs = await args.shift()
       if (args.length == 0) {
         return message.channel.send("Please specify the time for ban.")
       }
-      console.log(args)
       for (const arg of args) {
         let types = ['d', 'h', 'm', 's', 'ms']
         let argarr = []
@@ -488,8 +521,170 @@ bot.on("message", async message => {
       })
     }
   } else
-  if(cmd === `suggest`){
+  if (cmd === `suggest`) {
     suggestion(bot, message)
+  } else
+  if (cmd === `mute`) {
+    if (daily !== null && timeout - (Date.now() - daily) > 0) {
+      let time = ms(timeout - (Date.now() - daily))
+
+      return message.channel.send(`You're on cooldown. Wait ${time.seconds}s and try again.`)
+    } else {
+      db.set(`timeout_${message.author.id}`, Date.now())
+      if (!message.member.roles.has(botrole.id)) return message.channel.send("Insufficient Permissions")
+      let helpEmbed = new Discord.RichEmbed()
+        .setColor(embedColor)
+        .setTitle('mute')
+        .setDescription(`Description: Mutes the specified user for a certain period of time\nUsage: ${prefix}mute (user) (time)\nExample: ${prefix}mute Threqt 15h`)
+      if (message.content.trim().slice(cmd.length + 1).replace(/ /g, '') === '') {
+        return message.channel.send(helpEmbed)
+      }
+      if (message.mentions.users.size === 0) {
+        return message.channel.send("Please mention a user.")
+      }
+      let mutememb = message.guild.member(message.mentions.users.first())
+      if (!mutememb) {
+        return message.channel.send("Please mention a valid user.")
+      }
+      if (mutememb.highestRole.position >= message.member.highestRole.position) {
+        return message.channel.send("Person is of a higher rank than you.")
+      }
+      var newargs = await args.shift()
+      if (args.length == 0) {
+        return message.channel.send("Please specify the time for the mute.")
+      }
+      for (const arg of args) {
+        let types = ['d', 'h', 'm', 's', 'ms']
+        let argarr = []
+        let newarg = arg.trim().replace(/ /g, '')
+        for (i = 0; i < arg.length; i++) {
+          argarr.push(newarg.charAt(i))
+        }
+        let last = argarr.pop()
+        let match = false
+        for (const type of types) {
+          if (last.toLowerCase() == type.toLowerCase()) {
+            match = true
+          }
+        }
+        if (match == false) {
+          return message.channel.send('Malformed Argument: ' + arg)
+        }
+        globaltrue = []
+        for (const char of argarr) {
+          let valid = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+          let match2 = false
+          for (const val of valid) {
+            if (char == val) {
+              match2 = true
+            }
+          }
+          if (match2 == false) {
+            return message.channel.send('Malformed Argument: ' + arg)
+          }
+        }
+      }
+      let msarr = []
+      for (const arg of args) {
+        let desc = ''
+        let argarr1 = []
+        let newarg1 = arg.trim().replace(/ /g, '')
+        for (i = 0; i < arg.length; i++) {
+          argarr1.push(newarg1.charAt(i))
+        }
+        let indentifier = argarr1.pop()
+        let numbval = parseInt(argarr1.join(''))
+        let types1 = ['d', 'h', 'm', 's', 'ms']
+        switch (indentifier) {
+          case 'd':
+            msarr.push(toMs({
+              days: numbval
+            }))
+            break;
+          case 'h':
+            msarr.push(toMs({
+              hours: numbval
+            }))
+            break;
+          case 'm':
+            msarr.push(toMs({
+              minutes: numbval
+            }))
+            break;
+          case 's':
+            msarr.push(toMs({
+              seconds: numbval
+            }))
+            break;
+          case 'h':
+            msarr.push(numbval)
+            break;
+        }
+      }
+      const arrSum = arr => arr.reduce((a, b) => a + b, 0)
+      let totalMs = arrSum(msarr)
+      message.channel.send("Please specify the reason you're muting this user.")
+      const filter = m => message.author.id === m.author.id;
+      let collected = await message.channel.awaitMessages(filter, {
+        max: 1,
+        time: toMs({
+          minutes: 20
+        }),
+        errors: ['time']
+      }).catch(error => {
+        if (error.reason === 'time') {
+          return message.channel.send('Timed out.')
+        }
+      })
+      let reason = collected.first().content
+      var muteRole = message.member.guild.roles.find("name", "Muted")
+      if (!muteRole) {
+        try {
+          muteRole = await message.member.guild.createRole({
+            name: "Muted",
+            permissions: []
+          });
+
+          let channels = message.member.guild.channels
+          for (var channel of channels) {
+            try {
+              channel.overwritePermissions(role, {
+                SEND_MESSAGES: false,
+                ADD_REACTIONS: false
+              })
+            } catch (e) {
+              return message.channel.send('You did not have a muted role and I failed to create one. Exiting out of command...')
+            }
+          }
+        } catch (e) {
+          message.channel.send("Failed to find muted role, I tried to create one. This role will be assigned to the muted person.")
+        }
+      }
+      await mutememb.addRole(muterole).then(async member => {
+        let muteobj = {
+          user: mutememb,
+          guild: message.member.guild.id,
+          time: Date.now() + totalMs,
+          realtime: pMs(totalMs),
+          role: muteRole
+        }
+        db.set(`mutes.${mutememb.user.id}`, muteobj)
+        message.channel.send(`Successfully muted ${mutememb.displayName} for ${pMs(totalMs)}`)
+        let logEmbed = new Discord.RichEmbed()
+          .setColor(embedColor)
+          .setDescription('User ' + mutememb.displayName + ' has been muted by ' + message.member.displayName + '.')
+          .addField('User Muted', mutememb.displayName)
+          .addField('User who Muted', message.member.displayName)
+          .addField('Duration', pMs(totalMs))
+        let channel = await message.member.guild.channels.find("name", "mute-logs")
+        try {
+          channel.send(logEmbed)
+        } catch (e) {
+          message.channel.send('An error occurred, probably because the channel mute-logs does not exist. I will post the log here instead.')
+          return message.channel.send(logEmbed)
+        }
+      })
+    }
   }
 })
 
