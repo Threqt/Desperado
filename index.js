@@ -263,10 +263,10 @@ bot.on("ready", async () => {
 })
 
 bot.on("message", async message => {
-  prefix = db.fetch(`guildInfo_${message.member.guild.id}.prefix`)
+  prefix = db.fetch(`guildInfo_${message.guild.id}.prefix`)
 
   if (!prefix) {
-    db.set(`guildInfo_${message.member.guild.id}.prefix`, '-')
+    db.set(`guildInfo_${message.guild.id}.prefix`, '-')
     prefix = db.fetch(`guildInfo_${message.guild.id}.prefix`)
   }
 
@@ -367,7 +367,7 @@ bot.on("message", async message => {
       }
     }
   } else
-  if (cmd === 'commands' || cmd === 'cmd') {
+  if (cmd === 'commands' || cmd === 'cmds') {
     if (daily !== null && timeout - (Date.now() - daily) > 0) {
       let time = ms(timeout - (Date.now() - daily))
 
