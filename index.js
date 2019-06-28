@@ -223,6 +223,8 @@ bot.on("ready", async () => {
         }
       }
     }
+  }, 5000)
+  bot.setInterval(() => {
     let mutes = db.fetch('mutes')
     if (mutes == null) {
       return
