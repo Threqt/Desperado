@@ -241,12 +241,7 @@ bot.on("ready", async () => {
 
       if (Date.now() > time) {
         db.delete(`mutes.${userid}`)
-        try {
           user.removeRole(muterole)
-        } catch (e) {
-          channel.send(`Could not unmute ${user.user.username} due to an error.`)
-          continue;
-        }
         let logEmbed = new Discord.RichEmbed()
           .setColor(embedColor)
           .setDescription('Unmuted user ' + user.user.username + ' because their mute duration was over.')
