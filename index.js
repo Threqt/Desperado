@@ -242,7 +242,7 @@ bot.on("ready", async () => {
       if (Date.now() > time) {
         db.delete(`mutes.${userid}`)
         try {
-          user.removeRole(muterole)
+          user.removeRole(muterole.id)
         } catch (e) {
           channel.send(`Could not unmute ${user.user.username} due to an error.`)
           continue;
