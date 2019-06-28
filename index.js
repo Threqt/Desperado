@@ -242,7 +242,7 @@ bot.on("ready", async () => {
       if (Date.now() > time) {
         db.delete(`mutes.${userid}`)
         try {
-          user.removeRole(muterole.id)
+          user.removeRole(muterole)
         } catch (e) {
           channel.send(`Could not unmute ${user.user.username} due to an error.`)
           continue;
@@ -664,7 +664,7 @@ bot.on("message", async message => {
           guild: message.member.guild.id,
           time: Date.now() + totalMs,
           realtime: pMs(totalMs),
-          role: muteRole
+          role: muteRole.id
         }
         db.set(`mutes.${mutememb.user.id}`, muteobj)
         message.channel.send(`Successfully muted ${mutememb.displayName} for ${pMs(totalMs)}`)
