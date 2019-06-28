@@ -200,7 +200,6 @@ bot.on("ready", async () => {
       let guild = bot.guilds.get(guildid)
       let user = info.user
       let channel = getDefaultChannel(guild)
-
       if (Date.now() > time) {
         db.delete(`tempbans.${userid}`)
         try {
@@ -238,14 +237,15 @@ bot.on("ready", async () => {
       let user = info.user
       let channel = getDefaultChannel(guild)
       let muterole = info.role
+      let guildmember = guild.member(user)
 
       if (Date.now() > time) {
         db.delete(`mutes.${userid}`)
-          user.removeRole(muterole)
+          guildmember.removeRole(muterole)
         let logEmbed = new Discord.RichEmbed()
           .setColor(embedColor)
-          .setDescription('Unmuted user ' + user.user.username + ' because their mute duration was over.')
-          .addField('User ID', user.user.id)
+          .setDescription('Unmuted user ' + user.username + ' because their mute duration was over.')
+          .addField('User ID', user.id)
           .addField('Duration', info.realtime)
         let channela = guild.channels.find("name", "mute-logs")
         try {
@@ -256,6 +256,10 @@ bot.on("ready", async () => {
         }
       }
     }
+  // } catch (e) {
+  //   channel.send(`Could not unmute ${user.user.username} due to an error.`)
+  //   continue;
+  // }
   }, 5000)
 })
 
@@ -655,7 +659,7 @@ bot.on("message", async message => {
       }
       await mutememb.addRole(muteRole).then(async member => {
         let muteobj = {
-          user: mutememb,
+          user: mutememb.user,
           guild: message.member.guild.id,
           time: Date.now() + totalMs,
           realtime: pMs(totalMs),
