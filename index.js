@@ -268,7 +268,22 @@ bot.on("guildMemberAdd", async member => {
   let welcomeEmbed = new Discord.RichEmbed()
     .setColor(embedColor)
     .setDescription(`Welcome to **${member.guild.name}**, <@${member.user.id}>`)
-    .set
+    .setFooter(`${message.author.tag} | ${message.author.id}`)
+  let defChannel = getDefaultChannel(member.guild)
+  let welcomeChannel = member.guild.channels.find("name", "welcome")
+  try {
+    welcomeChannel.send(welcomeEmbed)
+  } catch(e) {
+    return defChannel.send("Failed to send welcomeEmbed. Your guild probably lacks the welcome channel.")
+  }
+  let dmChannel = await member.user.createDM()
+  dmChannel.send(`Welcome to **${member.guild.name}**, **${member.user.username}**`)
+  let newRole = member.guild.roles.find("name", "Community Member")
+  try {
+    member.addRole(newRole)
+  } catch(e) {
+    return defChannel.send('Failed to autorole')
+  }
 })
 
 bot.on("message", async message => {
