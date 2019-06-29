@@ -883,7 +883,6 @@ bot.on("message", async message => {
         }
 
         const fetched = await message.channel.fetchMessages({limit: args[0]})
-        console.log(fetched)
         message.channel.bulkDelete(fetched)
           .catch(error => message.channel.send(`Error: ${error}`))
       }
