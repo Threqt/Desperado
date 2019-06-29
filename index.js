@@ -264,11 +264,11 @@ bot.on("ready", async () => {
 })
 
 bot.on("message", async message => {
-  prefix = db.fetch(`guildInfo_${message.guild.id}.prefix`)
+  prefix = db.fetch(`guildInfo_${message.member.guild.id}.prefix`)
 
   if (!prefix) {
     db.set(`guildInfo_${message.guild.id}.prefix`, '-')
-    prefix = db.fetch(`guildInfo_${message.guild.id}.prefix`)
+    prefix = db.fetch(`guildInfo_${message.member.guild.id}.prefix`)
   }
 
   if (message.isMemberMentioned(bot.user)) {
