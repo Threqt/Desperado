@@ -244,8 +244,8 @@ bot.on("ready", async () => {
           guildmember.removeRole(muterole)
         let logEmbed = new Discord.RichEmbed()
           .setColor(embedColor)
-          .setDescription('Unmuted user ' + user.userusername + ' because their mute duration was over.')
-          .addField('User ID', user.id)
+          .setDescription('Unmuted user ' + user.user.username + ' because their mute duration was over.')
+          .addField('User ID', user.user.id)
           .addField('Duration', info.realtime)
         let channela = guild.channels.find("name", "mute-logs")
         try {
@@ -698,9 +698,9 @@ bot.on("message", async message => {
       if(mutes == null){
         return message.channel.send('No mutes in the guild')
       }
-      let mutesarr = Object.entries(mutes)
-      let relevantresults = []
-      for(var [user, info] in mutesarr){
+      var tmutes = Object.entries(mutes)
+      var relevantresults = []
+      for (var [dude, info] of tmutes) {
         console.log(info)
         if(info.guild == message.guild.id){
           relevantresults.push(info)
