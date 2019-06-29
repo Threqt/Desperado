@@ -711,7 +711,7 @@ bot.on("message", async message => {
       }
       let desc = ''
       for(var obj of relevantresults){
-        desc = desc + `Name: ${obj.user.username} | Duration: ${pMs(obj.realtime)} Time Left: ${pMs(obj.time - Date.now())} Reason: ${obj.reason}\n\n`
+        desc = desc + `Name: ${obj.user.username} | Duration: ${obj.realtime} Time Left: ${pMs(obj.time - Date.now())} Reason: ${obj.reason}\n\n`
       }
       let mutesEmbed = new Discord.RichEmbed()
         .setColor(embedColor)
