@@ -501,16 +501,18 @@ bot.on("message", async message => {
           user: tbanmemb,
           guild: message.member.guild.id,
           time: Date.now() + totalMs,
-          realtime: pMs(totalMs)
+          realtime: pMs(totalMs),
+          reason: reason
         }
         db.set(`tempbans.${tbanmemb.user.id}`, tbanobj)
         message.channel.send(`Successfully tempbanned ${tbanmemb.displayName} for ${pMs(totalMs)}`)
         let logEmbed = new Discord.RichEmbed()
           .setColor(embedColor)
           .setDescription('User ' + tbanmemb.displayName + ' has been temp banned by ' + message.member.displayName + '.')
-          .addField('User Banned', tbanmemb.displayName)
-          .addField('User who Banned', message.member.displayName)
-          .addField('Duration', pMs(totalMs))
+          .addField('User Banned', tbanmemb.displayName, true)
+          .addField('User who Banned', message.member.displayName, true)
+          .addField('Duration', pMs(totalMs), true)
+          .addField('Reason', reason, true)
         let channel = await message.member.guild.channels.find("name", "ban-logs")
         try {
           channel.send(logEmbed)
@@ -663,16 +665,18 @@ bot.on("message", async message => {
           guild: message.member.guild.id,
           time: Date.now() + totalMs,
           realtime: pMs(totalMs),
-          role: muteRole.id
+          role: muteRole.id,
+          reason: reason
         }
         db.set(`mutes.${mutememb.user.id}`, muteobj)
         message.channel.send(`Successfully muted ${mutememb.displayName} for ${pMs(totalMs)}`)
         let logEmbed = new Discord.RichEmbed()
           .setColor(embedColor)
           .setDescription('User ' + mutememb.displayName + ' has been muted by ' + message.member.displayName + '.')
-          .addField('User Muted', mutememb.displayName)
-          .addField('User who Muted', message.member.displayName)
-          .addField('Duration', pMs(totalMs))
+          .addField('User Muted', mutememb.displayName, true)
+          .addField('User who Muted', message.member.displayName, true)
+          .addField('Duration', pMs(totalMs), true)
+          .addField('Reason', reason, true)
         let channel = await message.member.guild.channels.find("name", "mute-logs")
         try {
           channel.send(logEmbed)
@@ -682,29 +686,39 @@ bot.on("message", async message => {
         }
       })
     }
+  } else
+  if(cmd === `viewmutes`){
+    if (daily !== null && timeout - (Date.now() - daily) > 0) {
+      let time = ms(timeout - (Date.now() - daily))
+
+      return message.channel.send(`You're on cooldown. Wait ${time.seconds}s and try again.`)
+    } else {
+      db.set(`timeout_${message.author.id}`, Date.now())
+      let mutes = db.fetch('mutes')
+      if(mutes == null){
+        return message.channel.send('No mutes in the guild')
+      }
+      let mutesarr = Object.entries(mutes)
+      let relevantresults = []
+      for(var [user, obj] in mutesarr){
+        if(obj.guild == message.guild.id){
+          relevantresults.push(obj)
+        }
+      }
+      if(relevantresults.size == 0){
+        return message.channel.send('No mutes in the guild')
+      }
+      let desc = ''
+      for(var obj of relevantresults){
+        desc = desc + `Name: ${obj.user.username} | Duration: ${pMs(obj.realtime)} Time Left: ${pMs(obj.time - Date.now())} Reason: ${obj.reason}\n\n`
+      }
+      let mutesEmbed = new Discord.RichEmbed()
+        .setColor(embedColor)
+        .setTitle('Mutes in the guild ' +  message.guild.name + ':')
+        .setDescription(desc)
+      message.channel.send(mutesEmbed)
+    }
   }
 })
-
-// for (const arg of args) {
-//   let types = ['d', 'h', 'm', 's', 'ms']
-//   let argarr = []
-//   let newarg = arg.trim().replace(/ /g, '')
-//   for (i = 0; i < arg.length; i++) {
-//     argarr.push(newarg.charAt(i))
-//   }
-//   console.log(argarr)
-//   let last = argarr.pop()
-//   console.log(last)
-//   let match = false
-//   for (const type of types) {
-//     if (last.toLowerCase() == type.toLowerCase()) {
-//       match = true
-//     }
-//   }
-//   if (match = false) {
-//     return message.channel.send("One or more arguments are malformed")
-//   }
-// }
-// }
 
 bot.login(process.env.token)
