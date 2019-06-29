@@ -777,9 +777,6 @@ bot.on("message", async message => {
         return message.channel.send("Person is of a higher rank than you.")
       }
       var newargs = await args.shift()
-      if (args.length == 0) {
-        return message.channel.send("Please specify the time for ban.")
-      }
       let reason = newargs.join(' ')
       try {
         tbanmemb.ban().then(async member => {
@@ -800,6 +797,55 @@ bot.on("message", async message => {
         })
       } catch(e) {
         return message.channel.send(`Could not ban ${tbanmemb.user.username} because something failed.\n${e.stack}`)
+      }
+    }
+  } else
+  if(cmd === `kick`){
+    if (daily !== null && timeout - (Date.now() - daily) > 0) {
+      let time = ms(timeout - (Date.now() - daily))
+
+      return message.channel.send(`You're on cooldown. Wait ${time.seconds}s and try again.`)
+    } else {
+      db.set(`timeout_${message.author.id}`, Date.now())
+      if (!message.member.roles.has(botrole.id)) return message.channel.send("Insufficient Permissions")
+      let helpEmbed = new Discord.RichEmbed()
+        .setColor(embedColor)
+        .setTitle('kick')
+        .setDescription(`Description: Kicks a user from the guild\n\nUsage: ${prefix}kick (player) (reason)\n\nExample: ${prefix}kick Threqt For the test`)
+      if (message.content.trim().slice(cmd.length + 1).replace(/ /g, '') === '') {
+        return message.channel.send(helpEmbed)
+      }
+      if (message.mentions.users.size === 0) {
+        return message.channel.send("Please mention a user.")
+      }
+      let tbanmemb = message.guild.member(message.mentions.users.first())
+      if (!tbanmemb) {
+        return message.channel.send("Please mention a valid user.")
+      }
+      if (tbanmemb.highestRole.position >= message.member.highestRole.position) {
+        return message.channel.send("Person is of a higher rank than you.")
+      }
+      var newargs = await args.shift()
+      let reason = newargs.join(' ')
+      try {
+        tbanmemb.kick().then(async member => {
+          let channel = message.guild.channels.find('name', 'kick-logs')
+          let banEmbed = new Discord.RichEmbed()
+            .setColor(embedColor)
+            .setDescription(`${tbanmemb.user.username} has been kicked by ${message.author.username}`)
+            .addField('Kicked Person', tbanmemb.user.username)
+            .addField('Person who Kicked', message.author.username)
+            .addField('Reason', reason)
+          try {
+            channel.send(banEmbed)
+          } catch(e) {
+            console.log(e.stack)
+            message.channel.send('Could not send the kick embed in the ban logs probably because the channel does not exist, sending the log here...')
+            message.channel.send(banEmbed)
+          }
+        })
+      } catch(e) {
+        return message.channel.send(`Could not kick ${tbanmemb.user.username} because something failed.\n${e.stack}`)
       }
     }
   }
