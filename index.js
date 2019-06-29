@@ -378,7 +378,7 @@ bot.on("message", async message => {
       let commandEmbed = new Discord.RichEmbed()
         .setColor(embedColor)
         .setTitle('Bot Commands')
-        .setDescription('**settings:** Sets specific settings for the bot (BOT PERMISSIONS)\n\n**ping:** Checks latency and api latency\n\n**tban:** Temporarily bans a person for the set amount of time (BOT PERMISSIONS ONLY)\n\n**suggest:** Creates a suggestion which can be viewed by the community after being voted on by the administration\n\n**mute:** Mutes a user for a certain period of time (BOT PERMISSIONS ONLY)')
+        .setDescription('**settings:** Sets specific settings for the bot (BOT PERMISSIONS)\n\n**ping:** Checks latency and api latency\n\n**tban:** Temporarily bans a person for the set amount of time (BOT PERMISSIONS ONLY)\n\n**suggest:** Creates a suggestion which can be viewed by the community after being voted on by the administration\n\n**mute:** Mutes a user for a certain period of time (BOT PERMISSIONS ONLY)\n\n**viewmutes:** Views all mutes in the server.\n\n**viewtbans** Views all tempbans in the server.')
       let dmChannel = await message.author.createDM()
       dmChannel.send(commandEmbed)
     }
@@ -701,7 +701,6 @@ bot.on("message", async message => {
       var tmutes = Object.entries(mutes)
       var relevantresults = []
       for (var [dude, info] of tmutes) {
-        console.log(info)
         if(info.guild == message.guild.id){
           relevantresults.push(info)
         }
@@ -734,7 +733,6 @@ bot.on("message", async message => {
       var tmutes = Object.entries(mutes)
       var relevantresults = []
       for (var [dude, info] of tmutes) {
-        console.log(info)
         if(info.guild == message.guild.id){
           relevantresults.push(info)
         }
