@@ -241,7 +241,7 @@ bot.on("ready", async () => {
 
       if (Date.now() > time) {
         db.delete(`mutes.${userid}`)
-          guildmember.removeRole(muterole)
+        guildmember.removeRole(muterole)
         let logEmbed = new Discord.RichEmbed()
           .setColor(embedColor)
           .setDescription('Unmuted user ' + user.user.username + ' because their mute duration was over.')
@@ -256,10 +256,10 @@ bot.on("ready", async () => {
         }
       }
     }
-  // } catch (e) {
-  //   channel.send(`Could not unmute ${user.user.username} due to an error.`)
-  //   continue;
-  // }
+    // } catch (e) {
+    //   channel.send(`Could not unmute ${user.user.username} due to an error.`)
+    //   continue;
+    // }
   }, 5000)
 })
 
@@ -687,7 +687,7 @@ bot.on("message", async message => {
       })
     }
   } else
-  if(cmd === `viewmutes`){
+  if (cmd === `viewmutes`) {
     if (daily !== null && timeout - (Date.now() - daily) > 0) {
       let time = ms(timeout - (Date.now() - daily))
 
@@ -695,31 +695,31 @@ bot.on("message", async message => {
     } else {
       db.set(`timeout_${message.author.id}`, Date.now())
       let mutes = db.fetch('mutes')
-      if(mutes == null){
+      if (mutes == null) {
         return message.channel.send('No mutes in the guild')
       }
       var tmutes = Object.entries(mutes)
       var relevantresults = []
       for (var [dude, info] of tmutes) {
-        if(info.guild == message.guild.id){
+        if (info.guild == message.guild.id) {
           relevantresults.push(info)
         }
       }
-      if(relevantresults.size == 0){
+      if (relevantresults.size == 0) {
         return message.channel.send('No mutes in the guild')
       }
       let desc = ''
-      for(var obj of relevantresults){
+      for (var obj of relevantresults) {
         desc = desc + `Name: ${obj.user.username} | Duration: ${obj.realtime} Time Left: ${pMs(Math.round(obj.time - Date.now()))} Reason: ${obj.reason}\n\n`
       }
       let mutesEmbed = new Discord.RichEmbed()
         .setColor(embedColor)
-        .setTitle('Mutes in the guild ' +  message.guild.name + ':')
+        .setTitle('Mutes in the guild ' + message.guild.name + ':')
         .setDescription(desc)
       message.channel.send(mutesEmbed)
     }
   } else
-  if(cmd === `viewtbans`){
+  if (cmd === `viewtbans`) {
     if (daily !== null && timeout - (Date.now() - daily) > 0) {
       let time = ms(timeout - (Date.now() - daily))
 
@@ -727,28 +727,80 @@ bot.on("message", async message => {
     } else {
       db.set(`timeout_${message.author.id}`, Date.now())
       let mutes = db.fetch('tempbans')
-      if(mutes == null){
+      if (mutes == null) {
         return message.channel.send('No tempbans in the guild')
       }
       var tmutes = Object.entries(mutes)
       var relevantresults = []
       for (var [dude, info] of tmutes) {
-        if(info.guild == message.guild.id){
+        if (info.guild == message.guild.id) {
           relevantresults.push(info)
         }
       }
-      if(relevantresults.size == 0){
+      if (relevantresults.size == 0) {
         return message.channel.send('No tempbans in the guild')
       }
       let desc = ''
-      for(var obj of relevantresults){
+      for (var obj of relevantresults) {
         desc = desc + `Name: ${obj.user.username} | Duration: ${obj.realtime} Time Left: ${pMs(Math.round(obj.time - Date.now()))} Reason: ${obj.reason}\n\n`
       }
       let mutesEmbed = new Discord.RichEmbed()
         .setColor(embedColor)
-        .setTitle('Tempbans in the guild ' +  message.guild.name + ':')
+        .setTitle('Tempbans in the guild ' + message.guild.name + ':')
         .setDescription(desc)
       message.channel.send(mutesEmbed)
+    }
+  } else
+  if (cmd === `ban`) {
+    if (daily !== null && timeout - (Date.now() - daily) > 0) {
+      let time = ms(timeout - (Date.now() - daily))
+
+      return message.channel.send(`You're on cooldown. Wait ${time.seconds}s and try again.`)
+    } else {
+      db.set(`timeout_${message.author.id}`, Date.now())
+      if (!message.member.roles.has(botrole.id)) return message.channel.send("Insufficient Permissions")
+      let helpEmbed = new Discord.RichEmbed()
+        .setColor(embedColor)
+        .setTitle('ban')
+        .setDescription(`Description: Bans a user from the guild\n\nUsage: ${prefix}ban (player) (reason)\n\nExample: ${prefix}ban Threqt For the test`)
+      if (message.content.trim().slice(cmd.length + 1).replace(/ /g, '') === '') {
+        return message.channel.send(helpEmbed)
+      }
+      if (message.mentions.users.size === 0) {
+        return message.channel.send("Please mention a user.")
+      }
+      let tbanmemb = message.guild.member(message.mentions.users.first())
+      if (!tbanmemb) {
+        return message.channel.send("Please mention a valid user.")
+      }
+      if (tbanmemb.highestRole.position >= message.member.highestRole.position) {
+        return message.channel.send("Person is of a higher rank than you.")
+      }
+      var newargs = await args.shift()
+      if (args.length == 0) {
+        return message.channel.send("Please specify the time for ban.")
+      }
+      let reason = newargs.join(' ')
+      try {
+        tbanmemb.ban().then(async member => {
+          let channel = message.guild.channels.find('name', 'ban-logs')
+          let banEmbed = new Discord.RichEmbed()
+            .setColor(embedColor)
+            .setDescription(`${tbanmemb.user.username} has been banned by ${message.author.username}`)
+            .addField('Banned Person', tbanmemb.user.username)
+            .addField('Person who Banned', message.author.username)
+            .addField('Reason', reason)
+          try {
+            channel.send(banEmbed)
+          } catch(e) {
+            console.log(e.stack)
+            message.channel.send('Could not send the ban embed in the ban logs probably because the channel does not exist, sending the log here...')
+            message.channel.send(banEmbed)
+          }
+        })
+      } catch(e) {
+        return message.channel.send(`Could not ban ${tbanmemb.user.username} because something failed.\n${e.stack}`)
+      }
     }
   }
 })
