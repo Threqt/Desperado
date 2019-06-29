@@ -378,7 +378,7 @@ bot.on("message", async message => {
       let commandEmbed = new Discord.RichEmbed()
         .setColor(embedColor)
         .setTitle('Bot Commands')
-        .setDescription('**settings:** Sets specific settings for the bot (BOT PERMISSIONS)\n\n**ping:** Checks latency and api latency\n\n**tban:** Temporarily bans a person for the set amount of time (BOT PERMISSIONS ONLY)\n\n**suggest:** Creates a suggestion which can be viewed by the community after being voted on by the administration\n\n**mute:** Mutes a user for a certain period of time (BOT PERMISSIONS ONLY)\n\n**viewmutes:** Views all mutes in the server.\n\n**viewtbans** Views all tempbans in the server.')
+        .setDescription('**settings:** Sets specific settings for the bot (BOT PERMISSIONS)\n\n**ping:** Checks latency and api latency\n\n**tban:** Temporarily bans a person for the set amount of time (BOT PERMISSIONS ONLY)\n\n**suggest:** Creates a suggestion which can be viewed by the community after being voted on by the administration\n\n**mute:** Mutes a user for a certain period of time (BOT PERMISSIONS ONLY)\n\n**viewmutes:** Views all mutes in the server.\n\n**viewtbans** Views all tempbans in the server.\n\n**ban:** Bans the user from the guild (BOT PERMISSIONS)\n\n**kick:** Kicks a user from the guild (BOT PERMISSIONS)\n\n**purge:** Purges the specified amount of messages from the channel (BOT PERMISSIONS)')
       let dmChannel = await message.author.createDM()
       dmChannel.send(commandEmbed)
     }
@@ -789,18 +789,18 @@ bot.on("message", async message => {
             .addField('Reason', reason)
           try {
             channel.send(banEmbed)
-          } catch(e) {
+          } catch (e) {
             console.log(e.stack)
             message.channel.send('Could not send the ban embed in the ban logs probably because the channel does not exist, sending the log here...')
             message.channel.send(banEmbed)
           }
         })
-      } catch(e) {
+      } catch (e) {
         return message.channel.send(`Could not ban ${tbanmemb.user.username} because something failed.\n${e.stack}`)
       }
     }
   } else
-  if(cmd === `kick`){
+  if (cmd === `kick`) {
     if (daily !== null && timeout - (Date.now() - daily) > 0) {
       let time = ms(timeout - (Date.now() - daily))
 
@@ -838,15 +838,48 @@ bot.on("message", async message => {
             .addField('Reason', reason)
           try {
             channel.send(banEmbed)
-          } catch(e) {
+          } catch (e) {
             console.log(e.stack)
             message.channel.send('Could not send the kick embed in the ban logs probably because the channel does not exist, sending the log here...')
             message.channel.send(banEmbed)
           }
         })
-      } catch(e) {
+      } catch (e) {
         return message.channel.send(`Could not kick ${tbanmemb.user.username} because something failed.\n${e.stack}`)
       }
+    }
+  } else
+  if (cmd === `purge`) {
+    if (daily !== null && timeout - (Date.now() - daily) > 0) {
+      let time = ms(timeout - (Date.now() - daily))
+
+      return message.channel.send(`You're on cooldown. Wait ${time.seconds}s and try again.`)
+    } else {
+      db.set(`timeout_${message.author.id}`, Date.now())
+      if (!message.member.roles.has(botrole.id)) return message.channel.send("Insufficient Permissions")
+      let helpEmbed = new Discord.RichEmbed()
+        .setColor(embedColor)
+        .setTitle('purge')
+        .setDescription(`Description: Purges a certain amount of messages from the channel\nUsage: ${prefix}purge (amount of messages)\nExample: ${prefix}purge 100`)
+      if (message.content.trim().slice(cmd.length + 1).replace(/ /g, '') === '') {
+        return message.channel.send(helpEmbed)
+      }
+      if (!args[0]) {
+        return message.channel.send("Please specify an amount of messages to purge.")
+      }
+      async function purgeMsg() {
+        message.delete()
+
+        if (isNaN(args[0])){
+          return message.channel.send(`Malformed Argument: ${args[0]}`)
+        }
+
+        const fetched = message.channel.fetchMessages({limit: args[0]})
+        message.channel.bulkDelete(fetched)
+          .catch(error => message.channel.send(`Error: ${error}`))
+      }
+
+      purgeMsg()
     }
   }
 })
