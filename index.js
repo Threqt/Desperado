@@ -875,16 +875,19 @@ bot.on("message", async message => {
       if (!args[0]) {
         return message.channel.send("Please specify an amount of messages to purge.")
       }
+      async function purgeMsg() {
         message.delete()
 
         if (isNaN(args[0])){
           return message.channel.send(`Malformed Argument: ${args[0]}`)
         }
 
-        const fetched = message.channel.fetchMessages({limit: args[0]})
-        console.log(fetched)
-        message.channel.bulkDelete(fetched.size)
+        const fetched = await message.channel.fetchMessages({limit: args[0]})
+        message.channel.bulkDelete(fetched)
           .catch(error => message.channel.send(`Error: ${error}`))
+      }
+
+      purgeMsg()
     }
   }
 })
