@@ -13,6 +13,7 @@ let prefix;
 const pMs = require('pretty-ms')
 const Enmap = require('enmap')
 const Long = require('long')
+const strSim = require('string-similarity')
 
 bot.settings = new Enmap({
   name: "settings",
@@ -261,6 +262,13 @@ bot.on("ready", async () => {
     //   continue;
     // }
   }, 5000)
+})
+
+bot.on("guildMemberAdd", async member => {
+  let welcomeEmbed = new Discord.RichEmbed()
+    .setColor(embedColor)
+    .setDescription(`Welcome to **${member.guild.name}**, <@${member.user.id}>`)
+    .set
 })
 
 bot.on("message", async message => {
@@ -867,7 +875,6 @@ bot.on("message", async message => {
       if (!args[0]) {
         return message.channel.send("Please specify an amount of messages to purge.")
       }
-      async function purgeMsg() {
         message.delete()
 
         if (isNaN(args[0])){
@@ -877,9 +884,6 @@ bot.on("message", async message => {
         const fetched = message.channel.fetchMessages({limit: args[0]})
         message.channel.bulkDelete(fetched)
           .catch(error => message.channel.send(`Error: ${error}`))
-      }
-
-      purgeMsg()
     }
   }
 })
