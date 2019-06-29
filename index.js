@@ -711,11 +711,44 @@ bot.on("message", async message => {
       }
       let desc = ''
       for(var obj of relevantresults){
-        desc = desc + `Name: ${obj.user.username} | Duration: ${obj.realtime} Time Left: ${pMs(obj.time - Date.now())} Reason: ${obj.reason}\n\n`
+        desc = desc + `Name: ${obj.user.username} | Duration: ${obj.realtime} Time Left: ${pMs(Math.round(obj.time - Date.now()))} Reason: ${obj.reason}\n\n`
       }
       let mutesEmbed = new Discord.RichEmbed()
         .setColor(embedColor)
         .setTitle('Mutes in the guild ' +  message.guild.name + ':')
+        .setDescription(desc)
+      message.channel.send(mutesEmbed)
+    }
+  } else
+  if(cmd === `viewtbans`){
+    if (daily !== null && timeout - (Date.now() - daily) > 0) {
+      let time = ms(timeout - (Date.now() - daily))
+
+      return message.channel.send(`You're on cooldown. Wait ${time.seconds}s and try again.`)
+    } else {
+      db.set(`timeout_${message.author.id}`, Date.now())
+      let mutes = db.fetch('tempbans')
+      if(mutes == null){
+        return message.channel.send('No tempbans in the guild')
+      }
+      var tmutes = Object.entries(mutes)
+      var relevantresults = []
+      for (var [dude, info] of tmutes) {
+        console.log(info)
+        if(info.guild == message.guild.id){
+          relevantresults.push(info)
+        }
+      }
+      if(relevantresults.size == 0){
+        return message.channel.send('No tempbans in the guild')
+      }
+      let desc = ''
+      for(var obj of relevantresults){
+        desc = desc + `Name: ${obj.user.username} | Duration: ${obj.realtime} Time Left: ${pMs(Math.round(obj.time - Date.now()))} Reason: ${obj.reason}\n\n`
+      }
+      let mutesEmbed = new Discord.RichEmbed()
+        .setColor(embedColor)
+        .setTitle('Tempbans in the guild ' +  message.guild.name + ':')
         .setDescription(desc)
       message.channel.send(mutesEmbed)
     }
