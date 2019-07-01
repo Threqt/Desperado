@@ -290,7 +290,7 @@ bot.on("guildMemberAdd", async member => {
 
 bot.on("message", async message => {
   prefix = db.fetch(`guildInfo_${message.member.guild.id}.prefix`)
-
+  console.log(prefix)
   if (!prefix) {
     db.set(`guildInfo_${message.guild.id}.prefix`, '-')
     prefix = db.fetch(`guildInfo_${message.member.guild.id}.prefix`)
