@@ -177,6 +177,8 @@ const getDefaultChannel = (guild) => {
 
 bot.on("ready", async () => {
   console.log(`${bot.user.username} has successfully been started.`)
+  console.log(`activityInfo.activity`)
+  console.log(`activityInfo.activityType`)
   if (!db.get('activityInfo.activity')) {
     db.set('activityInfo.activity', 'Lari Shower')
   }
