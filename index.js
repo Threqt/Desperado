@@ -676,7 +676,7 @@ bot.on("message", async message => {
         return message.channel.send("Cancelled")
       }
       if(message1.toLowerCase() == 'skip'){
-        reason = "No reason specified"
+        reason = "``No reason specified``"
       }
       let muteRole = message.guild.roles.find("name", "Muted")
       if (!muteRole) {
@@ -708,14 +708,12 @@ bot.on("message", async message => {
           reason: reason
         }
         db.set(`mutes.${mutememb.user.id}`, muteobj)
-        message.channel.send(`Successfully muted ${mutememb.displayName} for **${pMs(totalMs)}** for the reason **${reason}**`)
+        message.channel.send(`Successfully muted ${mutememb.displayName} for **${pMs(totalMs)}** for **${reason}**`)
         let logEmbed = new Discord.RichEmbed()
           .setColor(embedColor)
           .setAuthor(`Member Muted`, mutememb.user.displayAvatarURL)
-          .setDescription(`**User Muted:** ${mutememb.displayName}\n**Muted By:** ${message.member.displayName}**Duration:** ${pMs(totalMs)}
-        Reason: ${reason}
-        `)
-
+          .setDescription(`**User Muted:** ${mutememb.displayName}\n**Muted By:** ${message.member.displayName}\n**Duration:** ${pMs(totalMs)}\n**Reason:** ${reason}`)
+          .setFooter(`${bot.user.username}`, bot.user.displayAvatarURL)
         let channel = await message.member.guild.channels.find("name", "mute-logs")
         try {
           channel.send(logEmbed)
@@ -848,7 +846,7 @@ bot.on("message", async message => {
       let helpEmbed = new Discord.RichEmbed()
         .setColor(embedColor)
         .setAuthor('Kick Command')
-        .setDescription(`**Description:** Kicks a user from the guild\n\n**Usage:** ${prefix}kick (player) (reason)\n\n**Example:** ${prefix}kick Threqt For the test`)
+        .setDescription(`**Description:** Kicks a user from the guild\n\n**Usage:** ${prefix}kick (player) (reason)\n\n**Example:** ${prefix}kick Threqt Bad`)
       if (message.content.trim().slice(cmd.length + 1).replace(/ /g, '') === '') {
         return message.channel.send(helpEmbed)
       }
@@ -870,6 +868,7 @@ bot.on("message", async message => {
           let banEmbed = new Discord.RichEmbed()
             .setColor(embedColor)
             .setDescription(`${tbanmemb.user.username} has been kicked by ${message.author.username}`)
+            .setFooter(`${bot.user.username}`, bot.user.displayAvatarURL)
             .addField('Kicked Person', tbanmemb.user.username)
             .addField('Person who Kicked', message.author.username)
             .addField('Reason', reason)
