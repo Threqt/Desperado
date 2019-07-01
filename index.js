@@ -712,11 +712,8 @@ bot.on("message", async message => {
         let logEmbed = new Discord.RichEmbed()
           .setColor(embedColor)
           .setAuthor(`Member Muted`, mutememb.user.displayAvatarURL)
-          .setDescription(`
-          User Muted: ${mutememb.displayName}
-          Muted By: ${message.member.displayName}
-          Duration: ${pMs(totalMs)}
-          Reason: ${reason}
+          .setDescription(`**User Muted:** ${mutememb.displayName}\n**Muted By:** ${message.member.displayName}**Duration:** ${pMs(totalMs)}
+        Reason: ${reason}
         `)
 
         let channel = await message.member.guild.channels.find("name", "mute-logs")
@@ -826,7 +823,7 @@ bot.on("message", async message => {
           let banEmbed = new Discord.RichEmbed()
             .setColor(embedColor)
             .setAuthor("Member Banned", tbanmemb.user.displayAvatarURL)
-            .setDescription(`**User Banned:** ${tbanmemb.user.username}\n\n**Banned By:** ${message.author.username}\n\n**Reason:** ${reason}`)
+            .setDescription(`**User Banned:** ${tbanmemb.user.username}\n**Banned By:** ${message.author.username}\n**Reason:** ${reason}`)
           try {
             channel.send(banEmbed)
           } catch (e) {
