@@ -268,7 +268,7 @@ bot.on("guildMemberAdd", async member => {
   let welcomeEmbed = new Discord.RichEmbed()
     .setColor(embedColor)
     .setDescription(`Welcome to **${member.guild.name}**, <@${member.user.id}>`)
-    .setFooter(`${message.author.tag} | ${message.author.id}`)
+    .setFooter(`${member.user.author.tag} | ${member.user.author.id}`)
   let defChannel = getDefaultChannel(member.guild)
   let welcomeChannel = member.guild.channels.find("name", "welcome")
   try {
@@ -308,7 +308,7 @@ bot.on("message", async message => {
 
   let timeout = 5000
 
-  let daily = db.fetch(`timeout_${message.author.id}`)
+  let time = db.fetch(`timeout_${message.author.id}`)
 
   const args = message.content.slice(prefix.length).trim().split(/ +/g);
   const cmd = args.shift().toLowerCase();
@@ -316,8 +316,8 @@ bot.on("message", async message => {
   if (message.content.indexOf(prefix) !== 0) return;
 
   if (cmd === `ping`) {
-    if (daily !== null && timeout - (Date.now() - daily) > 0) {
-      let time = ms(timeout - (Date.now() - daily))
+    if (time !== null && timeout - (Date.now() - time) > 0) {
+      let time = ms(timeout - (Date.now() - time))
 
       return message.channel.send(`You're on cooldown. Wait ${time.seconds}s and try again.`)
     } else {
@@ -331,8 +331,8 @@ bot.on("message", async message => {
     }
   } else
   if (cmd === 'settings') {
-    if (daily !== null && timeout - (Date.now() - daily) > 0) {
-      let time = ms(timeout - (Date.now() - daily))
+    if (time !== null && timeout - (Date.now() - time) > 0) {
+      let time = ms(timeout - (Date.now() - time))
 
       return message.channel.send(`You're on cooldown. Wait ${time.seconds}s and try again.`)
     } else {
@@ -392,8 +392,8 @@ bot.on("message", async message => {
     }
   } else
   if (cmd === 'commands' || cmd === 'cmds') {
-    if (daily !== null && timeout - (Date.now() - daily) > 0) {
-      let time = ms(timeout - (Date.now() - daily))
+    if (time !== null && timeout - (Date.now() - time) > 0) {
+      let time = ms(timeout - (Date.now() - time))
 
       return message.channel.send(`You're on cooldown. Wait ${time.seconds}s and try again.`)
     } else {
@@ -407,8 +407,8 @@ bot.on("message", async message => {
     }
   } else
   if (cmd === 'tban') {
-    if (daily !== null && timeout - (Date.now() - daily) > 0) {
-      let time = ms(timeout - (Date.now() - daily))
+    if (time !== null && timeout - (Date.now() - time) > 0) {
+      let time = ms(timeout - (Date.now() - time))
 
       return message.channel.send(`You're on cooldown. Wait ${time.seconds}s and try again.`)
     } else {
@@ -505,7 +505,7 @@ bot.on("message", async message => {
       }
       const arrSum = arr => arr.reduce((a, b) => a + b, 0)
       let totalMs = arrSum(msarr)
-      message.channel.send("Please specify the reason you're banning this user.")
+      message.channel.send("Please specify the reason you're banning this user. Use skip if you have no reason and cancel to cancel")
       const filter = m => message.author.id === m.author.id;
       let collected = await message.channel.awaitMessages(filter, {
         max: 1,
@@ -518,7 +518,14 @@ bot.on("message", async message => {
           return message.channel.send('Timed out.')
         }
       })
-      let reason = collected.first().content
+      let message1 = collected.first().content
+      let reason = ""
+      if(message1.toLowerCase() == 'cancel'){
+        return message.channel.send("Cancelled")
+      }
+      if(message1.toLowerCase() == 'skip'){
+        reason = "No reason specified"
+      }
       await tbanmemb.ban().then(async member => {
         let tbanobj = {
           user: tbanmemb,
@@ -550,8 +557,8 @@ bot.on("message", async message => {
     suggestion(bot, message)
   } else
   if (cmd === `mute`) {
-    if (daily !== null && timeout - (Date.now() - daily) > 0) {
-      let time = ms(timeout - (Date.now() - daily))
+    if (time !== null && timeout - (Date.now() - time) > 0) {
+      let time = ms(timeout - (Date.now() - time))
 
       return message.channel.send(`You're on cooldown. Wait ${time.seconds}s and try again.`)
     } else {
@@ -559,8 +566,8 @@ bot.on("message", async message => {
       if (!message.member.roles.has(botrole.id)) return message.channel.send("Insufficient Permissions")
       let helpEmbed = new Discord.RichEmbed()
         .setColor(embedColor)
-        .setTitle('mute')
-        .setDescription(`Description: Mutes the specified user for a certain period of time\nUsage: ${prefix}mute (user) (time)\nExample: ${prefix}mute Threqt 15h`)
+        .setTitle('Mute')
+        .setDescription(`**Description:** Mutes the specified user for a certain period of time\n**Usage:** ${prefix}mute (user) (time)\n**Example:** ${prefix}mute Threqt 15h`)
       if (message.content.trim().slice(cmd.length + 1).replace(/ /g, '') === '') {
         return message.channel.send(helpEmbed)
       }
@@ -648,7 +655,7 @@ bot.on("message", async message => {
       }
       const arrSum = arr => arr.reduce((a, b) => a + b, 0)
       let totalMs = arrSum(msarr)
-      message.channel.send("Please specify the reason you're muting this user.")
+      message.channel.send("Please specify the reason you're muting this user below. Use cancel to cancel and skip if you have no reason.")
       const filter = m => message.author.id === m.author.id;
       let collected = await message.channel.awaitMessages(filter, {
         max: 1,
@@ -661,7 +668,14 @@ bot.on("message", async message => {
           return message.channel.send('Timed out.')
         }
       })
-      let reason = collected.first().content
+      let message1 = collected.first().content
+      let reason = ""
+      if(message1.toLowerCase() == 'cancel'){
+        return message.channel.send("Cancelled")
+      }
+      if(message1.toLowerCase() == 'skip'){
+        reason = "No reason specified"
+      }
       let muteRole = message.guild.roles.find("name", "Muted")
       if (!muteRole) {
         try {
@@ -692,14 +706,17 @@ bot.on("message", async message => {
           reason: reason
         }
         db.set(`mutes.${mutememb.user.id}`, muteobj)
-        message.channel.send(`Successfully muted ${mutememb.displayName} for ${pMs(totalMs)}`)
+        message.channel.send(`Successfully muted ${mutememb.displayName} for ${pMs(totalMs)} for the reason ${reason}`)
         let logEmbed = new Discord.RichEmbed()
           .setColor(embedColor)
-          .setDescription('User ' + mutememb.displayName + ' has been muted by ' + message.member.displayName + '.')
-          .addField('User Muted', mutememb.displayName, true)
-          .addField('User who Muted', message.member.displayName, true)
-          .addField('Duration', pMs(totalMs), true)
-          .addField('Reason', reason, true)
+          .setAuthor(`Member Muted`, tomute.user.displayAvatarURL)
+          .setDescription(`
+          User Muted: ${mutememb.displayName}
+          Muted By: ${message.member.displayName}
+          Duration: ${pMs(totalMs)}
+          Reason: ${reason}
+        `)
+
         let channel = await message.member.guild.channels.find("name", "mute-logs")
         try {
           channel.send(logEmbed)
@@ -711,8 +728,8 @@ bot.on("message", async message => {
     }
   } else
   if (cmd === `viewmutes`) {
-    if (daily !== null && timeout - (Date.now() - daily) > 0) {
-      let time = ms(timeout - (Date.now() - daily))
+    if (time !== null && timeout - (Date.now() - time) > 0) {
+      let time = ms(timeout - (Date.now() - time))
 
       return message.channel.send(`You're on cooldown. Wait ${time.seconds}s and try again.`)
     } else {
@@ -743,8 +760,8 @@ bot.on("message", async message => {
     }
   } else
   if (cmd === `viewtbans`) {
-    if (daily !== null && timeout - (Date.now() - daily) > 0) {
-      let time = ms(timeout - (Date.now() - daily))
+    if (time !== null && timeout - (Date.now() - time) > 0) {
+      let time = ms(timeout - (Date.now() - time))
 
       return message.channel.send(`You're on cooldown. Wait ${time.seconds}s and try again.`)
     } else {
@@ -775,8 +792,8 @@ bot.on("message", async message => {
     }
   } else
   if (cmd === `ban`) {
-    if (daily !== null && timeout - (Date.now() - daily) > 0) {
-      let time = ms(timeout - (Date.now() - daily))
+    if (time !== null && timeout - (Date.now() - time) > 0) {
+      let time = ms(timeout - (Date.now() - time))
 
       return message.channel.send(`You're on cooldown. Wait ${time.seconds}s and try again.`)
     } else {
@@ -824,8 +841,8 @@ bot.on("message", async message => {
     }
   } else
   if (cmd === `kick`) {
-    if (daily !== null && timeout - (Date.now() - daily) > 0) {
-      let time = ms(timeout - (Date.now() - daily))
+    if (time !== null && timeout - (Date.now() - time) > 0) {
+      let time = ms(timeout - (Date.now() - time))
 
       return message.channel.send(`You're on cooldown. Wait ${time.seconds}s and try again.`)
     } else {
@@ -873,8 +890,8 @@ bot.on("message", async message => {
     }
   } else
   if (cmd === `purge`) {
-    if (daily !== null && timeout - (Date.now() - daily) > 0) {
-      let time = ms(timeout - (Date.now() - daily))
+    if (time !== null && timeout - (Date.now() - time) > 0) {
+      let time = ms(timeout - (Date.now() - time))
 
       return message.channel.send(`You're on cooldown. Wait ${time.seconds}s and try again.`)
     } else {
@@ -900,9 +917,33 @@ bot.on("message", async message => {
         const fetched = await message.channel.fetchMessages({limit: args[0]})
         message.channel.bulkDelete(fetched)
           .catch(error => message.channel.send(`Error: ${error}`))
+
+        let purgeEmbed = new Discord.RichEmbed()
+          .setColor(embedColor)
+
       }
 
       purgeMsg()
+    }
+  } else
+  if(cmd === `say`){
+    if (time !== null && timeout - (Date.now() - time) > 0) {
+      let time = ms(timeout - (Date.now() - time))
+
+      return message.channel.send(`You're on cooldown. Wait ${time.seconds}s and try again.`)
+    } else {
+      db.set(`timeout_${message.author.id}`, Date.now())
+      let helpEmbed = new Discord.RichEmbed()
+        .setColor(embedColor)
+        .setTitle(`say`)
+        .setDescription(`Description: Makes the bot say the text\n\nUsage: ${prefix}say (text)\n\nExample: ${prefix}say Hello World!`)
+      if (message.content.trim().slice(cmd.length + 1).replace(/ /g, '') === '') {
+        return message.channel.send(helpEmbed)
+      }
+      if (!args[0]) {
+        return message.channel.send("Please specify the text to say")
+      }
+      let text = args.join(' ')
     }
   }
 })
