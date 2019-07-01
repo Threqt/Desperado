@@ -178,10 +178,10 @@ const getDefaultChannel = (guild) => {
 bot.on("ready", async () => {
   console.log(`${bot.user.username} has successfully been started.`)
   if (!db.get('activityInfo.activity')) {
-    db.set('activityInfo.activity', 'the waiting game')
+    db.set('activityInfo.activity', 'Lari Shower')
   }
   if (!db.get('activityInfo.activityType')) {
-    db.set('activityInfo.activityType', 'PLAYING')
+    db.set('activityInfo.activityType', 'WATCHING')
   }
   console.log(db.get('activityInfo.activityType'))
   console.log(db.get('activityInfo.activity'))
@@ -566,7 +566,7 @@ bot.on("message", async message => {
       if (!message.member.roles.has(botrole.id)) return message.channel.send("Insufficient Permissions")
       let helpEmbed = new Discord.RichEmbed()
         .setColor(embedColor)
-        .setTitle('Mute')
+        .setAuthor('Mute Command')
         .setDescription(`**Description:** Mutes the specified user for a certain period of time\n**Usage:** ${prefix}mute (user) (time)\n**Example:** ${prefix}mute Threqt 15h`)
       if (message.content.trim().slice(cmd.length + 1).replace(/ /g, '') === '') {
         return message.channel.send(helpEmbed)
@@ -655,7 +655,7 @@ bot.on("message", async message => {
       }
       const arrSum = arr => arr.reduce((a, b) => a + b, 0)
       let totalMs = arrSum(msarr)
-      message.channel.send("Please specify the reason you're muting this user below. Use cancel to cancel and skip if you have no reason.")
+      message.channel.send("Please specify the reason you're muting this user below. Use ``'cancel'`` to cancel or ``'skip'`` if you have no reason.")
       const filter = m => message.author.id === m.author.id;
       let collected = await message.channel.awaitMessages(filter, {
         max: 1,
@@ -706,10 +706,10 @@ bot.on("message", async message => {
           reason: reason
         }
         db.set(`mutes.${mutememb.user.id}`, muteobj)
-        message.channel.send(`Successfully muted ${mutememb.displayName} for ${pMs(totalMs)} for the reason ${reason}`)
+        message.channel.send(`Successfully muted ${mutememb.displayName} for **${pMs(totalMs)}** for the reason **${reason}**`)
         let logEmbed = new Discord.RichEmbed()
           .setColor(embedColor)
-          .setAuthor(`Member Muted`, tomute.user.displayAvatarURL)
+          .setAuthor(`Member Muted`, mutememb.user.displayAvatarURL)
           .setDescription(`
           User Muted: ${mutememb.displayName}
           Muted By: ${message.member.displayName}
@@ -801,8 +801,8 @@ bot.on("message", async message => {
       if (!message.member.roles.has(botrole.id)) return message.channel.send("Insufficient Permissions")
       let helpEmbed = new Discord.RichEmbed()
         .setColor(embedColor)
-        .setTitle('ban')
-        .setDescription(`Description: Bans a user from the guild\n\nUsage: ${prefix}ban (player) (reason)\n\nExample: ${prefix}ban Threqt For the test`)
+        .setAuthor('Ban Command')
+        .setDescription(`**Description:** Bans a user from the guild\n\n**Usage:** ${prefix}ban (player) (reason)\n\n**Example:** ${prefix}ban Threqt For the test`)
       if (message.content.trim().slice(cmd.length + 1).replace(/ /g, '') === '') {
         return message.channel.send(helpEmbed)
       }
@@ -823,10 +823,8 @@ bot.on("message", async message => {
           let channel = message.guild.channels.find('name', 'ban-logs')
           let banEmbed = new Discord.RichEmbed()
             .setColor(embedColor)
-            .setDescription(`${tbanmemb.user.username} has been banned by ${message.author.username}`)
-            .addField('Banned Person', tbanmemb.user.username)
-            .addField('Person who Banned', message.author.username)
-            .addField('Reason', reason)
+            .setAuthor("Member Banned", tbanmemb.user.displayAvatarURL)
+            .setDescription(`**User Banned:** ${tbanmemb.user.username}\n\n**Banned By:** ${message.author.username}\n\n**Reason:** ${reason}`)
           try {
             channel.send(banEmbed)
           } catch (e) {
@@ -850,8 +848,8 @@ bot.on("message", async message => {
       if (!message.member.roles.has(botrole.id)) return message.channel.send("Insufficient Permissions")
       let helpEmbed = new Discord.RichEmbed()
         .setColor(embedColor)
-        .setTitle('kick')
-        .setDescription(`Description: Kicks a user from the guild\n\nUsage: ${prefix}kick (player) (reason)\n\nExample: ${prefix}kick Threqt For the test`)
+        .setAuthor('Kick Command')
+        .setDescription(`**Description:** Kicks a user from the guild\n\n**Usage:** ${prefix}kick (player) (reason)\n\n**Example:** ${prefix}kick Threqt For the test`)
       if (message.content.trim().slice(cmd.length + 1).replace(/ /g, '') === '') {
         return message.channel.send(helpEmbed)
       }
@@ -899,8 +897,8 @@ bot.on("message", async message => {
       if (!message.member.roles.has(botrole.id)) return message.channel.send("Insufficient Permissions")
       let helpEmbed = new Discord.RichEmbed()
         .setColor(embedColor)
-        .setTitle('purge')
-        .setDescription(`Description: Purges a certain amount of messages from the channel\nUsage: ${prefix}purge (amount of messages)\nExample: ${prefix}purge 100`)
+        .setAuthor('Purge Command')
+        .setDescription(`**Description:** Purges a certain amount of messages from the channel\n**Usage:** ${prefix}purge (amount of messages)\n**Example:** ${prefix}purge 100`)
       if (message.content.trim().slice(cmd.length + 1).replace(/ /g, '') === '') {
         return message.channel.send(helpEmbed)
       }
@@ -935,8 +933,8 @@ bot.on("message", async message => {
       db.set(`timeout_${message.author.id}`, Date.now())
       let helpEmbed = new Discord.RichEmbed()
         .setColor(embedColor)
-        .setTitle(`say`)
-        .setDescription(`Description: Makes the bot say the text\n\nUsage: ${prefix}say (text)\n\nExample: ${prefix}say Hello World!`)
+        .setAuthor(`Say Command`)
+        .setDescription(`**Description:** Makes the bot say the text\n\n**Usage:** ${prefix}say (text)\n\n**Example:** ${prefix}say Hello World!`)
       if (message.content.trim().slice(cmd.length + 1).replace(/ /g, '') === '') {
         return message.channel.send(helpEmbed)
       }
@@ -944,6 +942,7 @@ bot.on("message", async message => {
         return message.channel.send("Please specify the text to say")
       }
       let text = args.join(' ')
+
     }
   }
 })
