@@ -354,7 +354,7 @@ bot.on("message", async message => {
         if (!args[1]) {
           return message.channel.send("You didn't specify a value.")
         }
-        db.set(`guildInfo_${message.member.guild.id}.prefix`, args[0])
+        db.set(`guildInfo_${message.member.guild.id}.prefix`, args[1])
         return message.channel.send(`The new prefix is ${db.fetch(`guildInfo_${message.member.guild.id}.prefix`)}`)
       }
       if (args[0] === 'activityType') {
