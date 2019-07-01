@@ -942,7 +942,7 @@ bot.on("message", async message => {
         return message.channel.send("Please specify the text to say")
       }
       let text = args.join(' ')
-
+      message.channel.send(text)
     }
   }
 })
