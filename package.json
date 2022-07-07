@@ -13,7 +13,7 @@
     "discord.js": "^11.5.1",
     "enmap": "^5.0.0",
     "long": "^4.0.0",
-    "moment": "^2.24.0",
+    "moment": "^2.29.4",
     "noblox.js": "^4.2.6",
     "parse-ms": "^2.1.0",
     "pretty-ms": "^5.0.0",
